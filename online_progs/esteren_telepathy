@@ -1,0 +1,8 @@
+#!/bin/bash
+
+ARGS=( ${*} )
+readonly SR_USER="${ARGS[0]}"
+readonly USER="$(printf '%s' "${ARGS[1]}"|base64 -D -)"
+readonly TEXT="$(printf '%s' "${ARGS[2]}"|base64 -D -)"
+
+printf '*%s* `>>` %s `<<`' "${USER}" "${TEXT}"

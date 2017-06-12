@@ -1,0 +1,6 @@
+CREATE TABLE tokens(token,command,team);
+CREATE TABLE channels(channel varchar(9), config smallint, name);
+CREATE TABLE "characters"(config smallint,slack_user varchar(9),charname,GM varchar(2),picture url);
+CREATE TABLE online(config smallint,command varchar(5),name,icon url,program,prefix,suffix);
+CREATE TABLE "global" (config smallint,chat_hook url,default_icon url,game,bot_name);
+CREATE TABLE apitokens(token,team);
