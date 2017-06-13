@@ -109,7 +109,7 @@ end
 
 
 #help_header = "*`#{cgi["command"]}` in-line help*"
-help_text = "This command accepts several dice roll types:\n\n*1.* Roll a _Shadowrun_ dice pool of the format `p+e`, e.g. `#{cgi["command"]} 5+3`, where 5 is your dice pool and 3 is your Edge dice. You can omit either, but not both, e.g. `#{cgi["command"]} 5` or `#{cgi["command"]} +3`. This type also accepts an optional Threshold, e.g. `#{cgi["command"]} 10+2 3`.\n\nThe color of the sidebar will be green if you rolled any hits, yellow if you didn’t. Red indicates a *Glitch*, while black means *Critical Glitch*. If a Threshold was supplied, green indicates success, yellow indicates failure.\n\n*2.* Roll a _Shadowrun_ initiative roll using the format `r+i`, e.g. `#{cgi["command"]} /init 9+4`, where 9 is your Reaction a 4 is your effective Initiative pool.\n\n*3.* Roll a Star Wars Boost, Setback, Ability, Difficulty, Proficiency, Challenge, and Force roll using the format `#b#s#a#d#p#c#f`. Each element is optional, but the order is strict.  For example, you can roll `2b3a1p` for 2 Boost, 3 Ability, 1 Proficiency, but they *must* be in the order specified.\n\n*4.* Roll the more standard gaming format of `NdX±Y`, e.g. `#{cgi["command"]} 4d6+2`, `3d8-2`, or `d100`. Omitting the number of dice to roll defaults to 1 rolled die. `d100` can be shortened to `d00`, `d0`, or `d%`.\n\nAny of those will accept, after the roll syntax, a comment to help identify the roll’s purpose, e.g. `#{cgi["command"]} 4+2 Bad Guy #1 Dodge`.\n\nIf you use the command `/mroll`, you can specify multiple rolls; typing a number between 1 and 9 after `/mroll`, e.g. `/mroll 3 /init 11+1 Flyspy`, will cause that number of rolls to be made. The number of the roll will be shown, appended to any comment if one was provided.\n\n*HINT:* Tab repeats the last command, and many rolls will accept 0 as a number of dice to roll. For more complex rolls, specify zero dice in the unused fields and a tab-edit makes the roller easier to use. For example: `#{cgi["command"]} 1b0s2a2d1p0c0f`\n\nFinally, you can roll dice privately in your own direct message channel. The results are visible only to you and lets bots interact with the result if they’re configured to."
+help_text = "This command accepts several dice roll types:\n\n*1.* Roll a _Shadowrun_ dice pool of the format `p+e`, e.g. `#{cgi["command"]} 5+3`, where 5 is your dice pool and 3 is your Edge dice. You can omit either, but not both, e.g. `#{cgi["command"]} 5` or `#{cgi["command"]} +3`. This type also accepts optional Limit and Threshold, e.g. `#{cgi["command"]} 10+2 3`, `#{cgi["command"]} 10+2 [5] 3`, or `#{cgi["command"]} 10+2 [4]`.\n\nThe color of the sidebar will be green if you rolled any hits, yellow if you didn’t. Red indicates a *Glitch*, while black means *Critical Glitch*. If a Threshold was supplied, green indicates success, yellow indicates failure.\n\n*2.* Roll a _Shadowrun_ initiative roll using the format `r+i`, e.g. `#{cgi["command"]} /init 9+4`, where 9 is your Reaction a 4 is your effective Initiative pool.\n\n*3.* Roll a Star Wars Boost, Setback, Ability, Difficulty, Proficiency, Challenge, and Force roll using the format `#b#s#a#d#p#c#f`. Each element is optional, but the order is strict.  For example, you can roll `2b3a1p` for 2 Boost, 3 Ability, 1 Proficiency, but they *must* be in the order specified.\n\n*4.* Roll the more standard gaming format of `NdX±Y`, e.g. `#{cgi["command"]} 4d6+2`, `3d8-2`, or `d100`. Omitting the number of dice to roll defaults to 1 rolled die. `d100` can be shortened to `d00`, `d0`, or `d%`.\n\nAny of those will accept, after the roll syntax, a comment to help identify the roll’s purpose, e.g. `#{cgi["command"]} 4+2 Bad Guy #1 Dodge`.\n\nIf you use the command `/mroll`, you can specify multiple rolls; typing a number between 1 and 9 after `/mroll`, e.g. `/mroll 3 /init 11+1 Flyspy`, will cause that number of rolls to be made. The number of the roll will be shown, appended to any comment if one was provided.\n\n*HINT:* Tab repeats the last command, and many rolls will accept 0 as a number of dice to roll. For more complex rolls, specify zero dice in the unused fields and a tab-edit makes the roller easier to use. For example: `#{cgi["command"]} 1b0s2a2d1p0c0f`\n\nFinally, you can roll dice privately in your own direct message channel. The results are visible only to you and lets bots interact with the result if they’re configured to."
 
 case text
 when ""
@@ -220,17 +220,24 @@ when /^\/init  *?([1-9]{1}[0-9]?)\+([1-5]{1}(?![0-9])) *(.*?) *$/
 
 		post_message(cgi["response_url"],message)
 	end
-#when /^([0-9]*)(?:\+([1-9]?)(?![0-9]))?(?: +([0-9]+))?(?:  *(.*?))? *$/
-when /^(\d{1,2})?(?:\+(\d))?(?: +(\d{1,2}))?(?: +(.*?))? *$/
+	# Shadowrun Dice Pool, Edge, Limit, Threshold, Comment
+	#    Pool: 1-2 digits, optional, capture group 1
+	#    Edge: +1 digit, optional, capture group 2
+	#    Limit: [1-2] digits, optional, capture group 3
+	#    Threshold: 1-2 digits, optional, capture group 4
+	#    Remainder is a comment, capture group 5
+when /^(\d{1,2})?(?:\+(\d))?(?: +\[(\d{1,2})\])?(?: +(\d{1,2}))?(?: +(.*?))? *$/
 	pool = $1.to_i
 	edge = $2.to_i
-	threshold = $3.to_i
+	edge == 0 && limit = $3.to_i or limit = 100 # Rolled Edge? No Limits
+	limit == 0 && limit = 100
+	threshold = $4.to_i
 
-	case $4.to_s
+	case $5.to_s
 	when ''
 		comment = ''
 	else
-		comment = " — #{$4}"
+		comment = " — #{$5}"
 	end
 
 	def explosion
@@ -303,20 +310,6 @@ when /^(\d{1,2})?(?:\+(\d))?(?: +(\d{1,2}))?(?: +(.*?))? *$/
 			end
 		end
 
-		if threshold > 0
-			if $hits >= threshold
-				net = $hits - threshold
-				result = 'Success!'
-				net == 1 && net_string = '1 Net Hit.' or net_string = "#{net} Net Hits."
-			else
-				result = 'Failure.'
-				color = 'warning'
-			end
-		else
-			$hits == 1 && result = '1 Hit.' or result = "#{$hits} Hits."
-			$hits == 0 && color = 'warning'
-		end
-
 			# Glitch Test (1s on more than ½ the dice rolled)
 		if ones > ( pool + edge ) / 2
 			glitch = ' Glitch!'
@@ -346,7 +339,6 @@ when /^(\d{1,2})?(?:\+(\d))?(?: +(\d{1,2}))?(?: +(.*?))? *$/
 						"dismiss_text" => "No"
 					}
 			}
-
 		end
 
 			# Misses are needed for reroller dialogue box
@@ -360,11 +352,18 @@ when /^(\d{1,2})?(?:\+(\d))?(?: +(\d{1,2}))?(?: +(.*?))? *$/
 		else
 			comparison = ''
 		end
-		edge == 0 && misses > 0 && second_chance = {
+
+			# If Edge was not rolled (no Push the Limits)…
+			#    and if there were misses…
+			#    and if the limit was not reached…
+			#    Then provide a Second Chance!
+		STDERR.puts "E:#{edge} M:#{misses} H:#{$hits} L:#{limit}"
+#		edge == 0 && misses > 0 && second_chance = {
+		edge == 0 && misses > 0 && $hits < limit && second_chance = {
 			"name" => "second_chance",
 			"text" => "Second Chance…",
 			"type" => "button",
-			"value" => "#{user_id} #{$hits.to_i} #{misses.to_i} #{threshold.to_i} #{cgc.to_i}",
+			"value" => "#{user_id} #{$hits.to_i} #{misses.to_i} #{threshold.to_i} #{cgc.to_i} #{limit.to_i}",
 			"confirm" =>
 				{
 					"title" => "Reroll #{misses} Miss#{plural}?",
@@ -374,7 +373,35 @@ when /^(\d{1,2})?(?:\+(\d))?(?: +(\d{1,2}))?(?: +(.*?))? *$/
 				}
 		}
 
-		threshold > 0 && threshold_string = "\nThreshold: #{threshold}" or threshold_string = ''
+			# Test against Limit
+		limit > 0 && $hits > limit && $hits = limit
+
+		if threshold > 0
+			if $hits >= threshold
+				net = $hits - threshold
+				result = "Success!"
+				net == 1 && net_string = '1 Net Hit.' or net_string = "#{net} Net Hits."
+			else
+				result = 'Failure.'
+				color == 'good' && color = 'warning'
+			end
+		else
+			$hits == 1 && result = '1 Hit.' or result = "#{$hits} Hits."
+			$hits == 0 && color == 'good' && color = 'warning'
+		end
+
+			# Threshold or Limit were specified, put them on the second info
+			#    line, otherwise, just have an empty threshold_string.
+			# TODO: rename the variable threshold_string to second_line or
+			#    something like that.
+		if threshold > 0 or limit > 0
+			detail = Array.new
+			threshold > 0 && detail[detail.length] = "Threshold: #{threshold}"
+			limit > 0 && limit < 100 && detail[detail.length] = "Limit: #{limit}"
+			threshold_string = "\n#{detail.join(' ')}"
+		else
+			threshold_string = ''
+		end
 
 			# If /mroll was called format/number the comment
 		if iterations > 1
@@ -407,7 +434,24 @@ when /^(\d{1,2})?(?:\+(\d))?(?: +(\d{1,2}))?(?: +(.*?))? *$/
 								}
 							],
 						"callback_id" => "edge_effect",
-						"actions" => [ second_chance, cc_button  ]
+						"actions" =>
+							[
+#								{
+#									"name" => "extended_test",
+#									"text" => "Extended Test…",
+#									"type" => "button",
+#									"value" => "#{user_id} #{$hits} #{pool} #{edge} #{threshold}", # #{interval.to_i}",
+#									"confirm" =>
+#										{
+#											"title" => "Extend Test?",
+#											"text" => "This will repeat your roll and keep track of the hits until you hit the threshold.",
+#											"ok_text" => "OK",
+#											"dismiss_text" => "Cancel"
+#										}
+#								},
+								second_chance,
+								cc_button
+							]
 					}
 				]
 		}
