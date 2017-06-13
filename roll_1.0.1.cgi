@@ -220,12 +220,16 @@ when /^\/init  *?([1-9]{1}[0-9]?)\+([1-5]{1}(?![0-9])) *(.*?) *$/
 
 		post_message(cgi["response_url"],message)
 	end
-#when /^([0-9]*)(?:\+([1-9]?)(?![0-9]))?(?: +([0-9]+))?(?:  *(.*?))? *$/
-#when /^(\d{1,2})?(?:\+(\d))?(?: +(\d{1,2}))?(?: +(.*?))? *$/
+	# Shadowrun Dice Pool, Edge, Limit, Threshold, Comment
+	#    Pool: 1-2 digits, optional, capture group 1
+	#    Edge: +1 digit, optional, capture group 2
+	#    Limit: [1-2] digits, optional, capture group 3
+	#    Threshold: 1-2 digits, optional, capture group 4
+	#    Remainder is a comment, capture group 5
 when /^(\d{1,2})?(?:\+(\d))?(?: +\[(\d{1,2})\])?(?: +(\d{1,2}))?(?: +(.*?))? *$/
 	pool = $1.to_i
 	edge = $2.to_i
-	edge == 0 && limit = $3.to_i or limit = 0
+	edge == 0 && limit = $3.to_i or limit = 0 # Rolled Edge? No Limits
 	threshold = $4.to_i
 
 	case $5.to_s
