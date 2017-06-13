@@ -364,7 +364,7 @@ when /^(\d{1,2})?(?:\+(\d))?(?: +(\d{1,2}))?(?: +(.*?))? *$/
 			"name" => "second_chance",
 			"text" => "Second Chance…",
 			"type" => "button",
-			"value" => "#{user_id} #{$hits} #{misses} #{threshold} #{cgc}",
+			"value" => "#{user_id} #{$hits.to_i} #{misses.to_i} #{threshold.to_i} #{cgc.to_i}",
 			"confirm" =>
 				{
 					"title" => "Reroll #{misses} Miss#{plural}?",

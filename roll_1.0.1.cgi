@@ -355,7 +355,7 @@ when /^(\d{1,2})?(?:\+(\d))?(?: +\[(\d{1,2})\])?(?: +(\d{1,2}))?(?: +(.*?))? *$/
 			"name" => "second_chance",
 			"text" => "Second Chance…",
 			"type" => "button",
-			"value" => "#{user_id} #{$hits} #{misses} #{threshold} #{cgc}",
+			"value" => "#{user_id} #{$hits.to_i} #{misses.to_i} #{threshold.to_i} #{cgc.to_i} #{limit.to_i}",
 			"confirm" =>
 				{
 					"title" => "Reroll #{misses} Miss#{plural}?",
@@ -388,8 +388,8 @@ when /^(\d{1,2})?(?:\+(\d))?(?: +\[(\d{1,2})\])?(?: +(\d{1,2}))?(?: +(.*?))? *$/
 			#    something like that.
 		if threshold > 0 or limit > 0
 			detail = Array.new
-			threshold > 0 && detail[detail.length] = "Threshold: #{threshold}"
-			limit > 0 && detail[detail.length] = "Limit: #{limit}"
+			threshold > 0 && detail[detail.length] = "Threshold: #{threshold}"
+			limit > 0 && detail[detail.length] = "Limit: #{limit}"
 			threshold_string = "\n#{detail.join(' ')}"
 		else
 			threshold_string = ''
@@ -436,7 +436,7 @@ when /^(\d{1,2})?(?:\+(\d))?(?: +\[(\d{1,2})\])?(?: +(\d{1,2}))?(?: +(.*?))? *$/
 #									"confirm" =>
 #										{
 #											"title" => "Extend Test?",
-#											"text" => "This will repeat your roll and keep track of the hits until you hit the threshold.", # if that helps you make up your mind.
+#											"text" => "This will repeat your roll and keep track of the hits until you hit the threshold.",
 #											"ok_text" => "OK",
 #											"dismiss_text" => "Cancel"
 #										}
