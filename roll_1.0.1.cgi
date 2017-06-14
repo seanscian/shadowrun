@@ -440,7 +440,7 @@ when /^(\d{1,2})?(?:\+(\d))?(?: +\[(\d{1,2})\])?(?: +(\d{1,2}))?(?: +(.*?))? *$/
 #									"name" => "extended_test",
 #									"text" => "Extended Test…",
 #									"type" => "button",
-#									"value" => "#{user_id} #{$hits} #{pool} #{edge} #{threshold}", # #{interval.to_i}",
+#									"value" => "#{user_id} #{$hits.to_i} #{misses.to_i} #{threshold.to_i} #{cgc.to_i} #{limit.to_i}", # #{interval.to_i}",
 #									"confirm" =>
 #										{
 #											"title" => "Extend Test?",
@@ -674,8 +674,8 @@ when /^(\d{1,2})?d(\d{1,2}|100|%)([+-]\d{1,2})?(?: +([^\t ].*?))? *$/
 			counter[roll] = counter[roll].to_i + 1
 			total += roll
 		end
-		STDERR.puts "#{x}d#{y}#{$3} = #{total}#{comment}#{iter_comment}" #
-		STDERR.puts counter
+#		STDERR.puts "#{x}d#{y}#{$3} = #{total}#{comment}#{iter_comment}" #
+#		STDERR.puts counter
 		sorted = Hash[counter.sort_by { |key, val| key}]
 
 		message = {
