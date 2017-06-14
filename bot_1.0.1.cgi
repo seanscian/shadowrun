@@ -136,10 +136,12 @@ when "re_init"
 when "edge_effect"
 	case slack_post["actions"][0]["name"]
 	when "second_chance"
+			# "#{user_id} #{$hits} #{misses} #{threshold} #{cgc}",
+#		STDERR.puts(slack_post) #
 		reroll = slack_post["actions"][0]["value"].split(" ")
 
 		if slack_post["user"]["id"] != reroll[0]
-#			STDERR.puts('That’s. Not. Yours.')
+#			STDERR.puts('That’s. Not. Yours.') #
 			exit
 		end
 
@@ -155,6 +157,8 @@ when "edge_effect"
 		threshold = reroll[3].to_i
 			# cgc: 1 = Glitch, 2 = Critical Glitch
 		cgc = reroll[4].to_i
+		limit = reroll[5].to_i
+#		STDERR.puts("Limit: #{limit}") #
 		pool = hits + misses
 		slack_post["original_message"]["attachments"][0]["color"] = '36a64f'
 
@@ -172,21 +176,6 @@ when "edge_effect"
 			end
 		end
 
-			# Threshold test and formatting
-		if threshold > 0
-			if hits >= threshold
-				net = hits-threshold
-				result = 'Success!'
-				net != 1 && netstring = "#{net} Net Hits." or netstring = "1 Net Hit."
-			else
-				result = 'Failure.'
-				slack_post["original_message"]["attachments"][0]["color"] = 'warning'
-			end
-		else
-			hits != 1 && result = "#{hits} Hits." or result = "1 Hit."
-			hits == 0 && slack_post["original_message"]["attachments"][0]["color"] = 'warning'
-		end
-
 			# (Critical) Glitch test and formatting
 		if ones > pool/2
 			glitch = ' Glitch!'
@@ -195,6 +184,25 @@ when "edge_effect"
 				critical = ' Critical'
 				slack_post["original_message"]["attachments"][0]["color"] = '#000000'
 			end
+		end
+
+			# Test against Limit
+		limit > 0 && hits > limit && hits = limit
+
+			# Threshold test and formatting
+		if threshold > 0
+			if hits >= threshold
+				net = hits-threshold
+				result = 'Success!'
+				net != 1 && netstring = "#{net} Net Hits." or netstring = "1 Net Hit."
+			else
+				result = 'Failure.'
+				slack_post["original_message"]["attachments"][0]["color"] == '36a64f' && slack_post["original_message"]["attachments"][0]["color"] = 'warning'
+			end
+		else
+			hits != 1 && result = "#{hits} Hits." or result = "1 Hit."
+			hits == 0 && slack_post["original_message"]["attachments"][0]["color"] == '36a64f' && slack_post["original_message"]["attachments"][0]["color"] = 'warning'
+#			hits == 0 && slack_post["original_message"]["attachments"][0]["color"] = 'warning'
 		end
 
 		case cgc

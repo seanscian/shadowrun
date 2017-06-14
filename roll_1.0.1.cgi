@@ -229,7 +229,8 @@ when /^\/init  *?([1-9]{1}[0-9]?)\+([1-5]{1}(?![0-9])) *(.*?) *$/
 when /^(\d{1,2})?(?:\+(\d))?(?: +\[(\d{1,2})\])?(?: +(\d{1,2}))?(?: +(.*?))? *$/
 	pool = $1.to_i
 	edge = $2.to_i
-	edge == 0 && limit = $3.to_i or limit = 0 # Rolled Edge? No Limits
+	edge == 0 && limit = $3.to_i or limit = 100 # Rolled Edge? No Limits
+	limit == 0 && limit = 100
 	threshold = $4.to_i
 
 	case $5.to_s
@@ -351,7 +352,14 @@ when /^(\d{1,2})?(?:\+(\d))?(?: +\[(\d{1,2})\])?(?: +(\d{1,2}))?(?: +(.*?))? *$/
 		else
 			comparison = ''
 		end
-		edge == 0 && misses > 0 && second_chance = {
+
+			# If Edge was not rolled (no Push the Limits)…
+			#    and if there were misses…
+			#    and if the limit was not reached…
+			#    Then provide a Second Chance!
+		STDERR.puts "E:#{edge} M:#{misses} H:#{$hits} L:#{limit}"
+#		edge == 0 && misses > 0 && second_chance = {
+		edge == 0 && misses > 0 && $hits < limit && second_chance = {
 			"name" => "second_chance",
 			"text" => "Second Chance…",
 			"type" => "button",
@@ -375,11 +383,11 @@ when /^(\d{1,2})?(?:\+(\d))?(?: +\[(\d{1,2})\])?(?: +(\d{1,2}))?(?: +(.*?))? *$/
 				net == 1 && net_string = '1 Net Hit.' or net_string = "#{net} Net Hits."
 			else
 				result = 'Failure.'
-				color = 'warning'
+				color == 'good' && color = 'warning'
 			end
 		else
 			$hits == 1 && result = '1 Hit.' or result = "#{$hits} Hits."
-			$hits == 0 && color = 'warning'
+			$hits == 0 && color == 'good' && color = 'warning'
 		end
 
 			# Threshold or Limit were specified, put them on the second info
@@ -389,7 +397,7 @@ when /^(\d{1,2})?(?:\+(\d))?(?: +\[(\d{1,2})\])?(?: +(\d{1,2}))?(?: +(.*?))? *$/
 		if threshold > 0 or limit > 0
 			detail = Array.new
 			threshold > 0 && detail[detail.length] = "Threshold: #{threshold}"
-			limit > 0 && detail[detail.length] = "Limit: #{limit}"
+			limit > 0 && limit < 100 && detail[detail.length] = "Limit: #{limit}"
 			threshold_string = "\n#{detail.join(' ')}"
 		else
 			threshold_string = ''
