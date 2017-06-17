@@ -35,8 +35,16 @@ token = token[0,24]
 #STDERR.puts("Current: #{token}")
 
 	# Use SQLite to see if the token we receive is in the database.
-	# Anyone have a better idea?
-if SQLite3::Database.new(database).execute("select token from tokens where token is \"#{token}\"").length == 0
+	#    Does anyone have a better idea than this? I don’t care about the
+	#    actual token, since I only want to know if the query returned
+	#    something.
+	# Also, I’ll open the database once here. It there’s no token, it
+	#    gets closed on exit, otherwise it gets used later, so no wasting
+	#    time on multiple SQLite3::Database.new calls..
+rpdb = SQLite3::Database.new(database)
+
+#if SQLite3::Database.new(database).execute("select token from tokens where token is \"#{token}\"").length == 0
+if rpdb.execute("select token from tokens where token is \"#{token}\"").length == 0
 	STDERR.puts('You’re not supposed to be here.')
 	exit
 else
@@ -62,7 +70,7 @@ else
 end
 
 sl_user = cgi['user_name']
-rpdb = SQLite3::Database.new(database)
+#rpdb = SQLite3::Database.new(database)
 
 db_config = rpdb.execute("select config from channels where channel is \"#{cgi["channel_id"]}\" limit 1")
 
@@ -611,7 +619,7 @@ when /^(?:(\d)b)?(?:(\d)s)?(?:(\d)a)?(?:(\d)d)?(?:(\d)p)?(?:(\d)c)?(?:(\d)f)?(?:
 		end
 
 #		STDERR.puts "COL: #{color}  #{s_or_f}  #{a_or_t}  #{t_or_d}" #
-			
+
 			# More complete debug, but information that’s displayed anyway.
 #		debug = "#{boost}b#{setbk}s#{abilt}a#{dfclt}d#{prfnc}p#{chlng}c#{force}f\n#{success} Success #{failure} Failure #{adv} Advantage #{thr} Threat\n#{tri} Triumph #{des} Despair #{drk} Dark #{lht} Light"
       debug = "#{cheating[1]}\n#{success} Success #{failure} Failure #{adv} Advantage #{thr} Threat"
@@ -697,7 +705,7 @@ when /^(\d{1,2})?d(\d{1,2}|100|%)([+-]\d{1,2})?(?: +([^\t ].*?))? *$/
 									"short" => true
 								}
 							],
-						"footer" => sorted.to_s 
+						"footer" => sorted.to_s
 					}
 				]
 		}
