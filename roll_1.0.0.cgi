@@ -89,7 +89,7 @@ else
 end
 
 	# D6 string, for fun (read: Shadowrun).
-die_string = "⚀⚁⚂⚃⚄⚅"
+SIX_SIDES = "⚀⚁⚂⚃⚄⚅"
 
 #case sl_user
 #when ""
@@ -154,8 +154,8 @@ when /^\/init  *?([1-9]{1}[0-9]?)\+([1-5]{1}(?![0-9])) *(.*?) *$/
 		roll_string = ''
 		for i in 1..$2.to_i
 			dieroll = rand(6)
-#			STDERR.puts("Rolled: ", die_string[dieroll,1]) #
-			roll_string = "#{roll_string}#{die_string[dieroll,1]} "
+#			STDERR.puts("Rolled: ", SIX_SIDES[dieroll,1]) #
+			roll_string = "#{roll_string}#{SIX_SIDES[dieroll,1]} "
 			total += dieroll
 		end
 
