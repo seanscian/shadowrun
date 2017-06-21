@@ -120,7 +120,7 @@ when ""
 	}
 
 	post_message(cgi["response_url"],message)
-when /^\/init +([1-9]{1}[0-9]?)\+([1-5]{1}(?![0-9])) *(.*?) *$/
+when /^\/init +([1-9]{1}[0-9]?)\+([1-5]{1})(?: +(.*?))? *$/
 #	STDERR.puts("found init: #{text}") #
 #	STDERR.puts("Reaction: ", $1) #
 #	STDERR.puts("Initiative Dice: ", $2) #
