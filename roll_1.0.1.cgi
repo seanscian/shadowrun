@@ -611,7 +611,7 @@ when /^(?:(\d)b)?(?:(\d)s)?(?:(\d)a)?(?:(\d)d)?(?:(\d)p)?(?:(\d)c)?(?:(\d)f)?(?:
 		end
 
 #		STDERR.puts "COL: #{color}  #{s_or_f}  #{a_or_t}  #{t_or_d}" #
-			
+
 			# More complete debug, but information that’s displayed anyway.
 #		debug = "#{boost}b#{setbk}s#{abilt}a#{dfclt}d#{prfnc}p#{chlng}c#{force}f\n#{success} Success #{failure} Failure #{adv} Advantage #{thr} Threat\n#{tri} Triumph #{des} Despair #{drk} Dark #{lht} Light"
       debug = "#{cheating[1]}\n#{success} Success #{failure} Failure #{adv} Advantage #{thr} Threat"
@@ -697,7 +697,7 @@ when /^(\d{1,2})?d(\d{1,2}|100|%)([+-]\d{1,2})?(?: +([^\t ].*?))? *$/
 									"short" => true
 								}
 							],
-						"footer" => sorted.to_s 
+						"footer" => sorted.to_s
 					}
 				]
 		}
