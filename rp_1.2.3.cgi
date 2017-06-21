@@ -617,8 +617,8 @@ case "${token}" in
 				fi
 
 				declare -i MISSES=$((${POOL}+${EDGE}-${HIT}))
-				SHORTFALL=$((${THRESHOLD}-${HIT}))
-				[ ${SHORTFALL} -gt 0 ] || unset SHORTFALL
+#				SHORTFALL=$((${THRESHOLD}-${HIT}))
+#				[ ${SHORTFALL} -gt 0 ] || unset SHORTFALL
 
 				[ ${MISSES} -eq 1 ] || PLURAL="es"
 
