@@ -35,8 +35,15 @@ token = token[0,24]
 #STDERR.puts("Current: #{token}")
 
 	# Use SQLite to see if the token we receive is in the database.
-	# Anyone have a better idea?
-if SQLite3::Database.new(database).execute("select token from tokens where token is \"#{token}\"").length == 0
+	#    Does anyone have a better idea than this? I don’t care about the
+	#    actual token, since I only want to know if the query returned
+	#    something.
+	# Also, I’ll open the database once here. It there’s no token, it
+	#    gets closed on exit, otherwise it gets used later, so no wasting
+	#    time on multiple SQLite3::Database.new calls.
+rpdb = SQLite3::Database.new(database)
+
+if rpdb.execute("select token from tokens where token is \"#{token}\"").length == 0
 	STDERR.puts('You’re not supposed to be here.')
 	exit
 else
@@ -62,7 +69,6 @@ else
 end
 
 sl_user = cgi['user_name']
-rpdb = SQLite3::Database.new(database)
 
 db_config = rpdb.execute("select config from channels where channel is \"#{cgi["channel_id"]}\" limit 1")
 
@@ -81,7 +87,7 @@ else
 end
 
 	# D6 string, for fun (read: Shadowrun).
-die_string = "⚀⚁⚂⚃⚄⚅"
+SIX_SIDES = "⚀⚁⚂⚃⚄⚅"
 
 #case sl_user
 #when ""
@@ -146,8 +152,8 @@ when /^\/init +([1-9]{1}[0-9]?)\+([1-5]{1})(?: +(.*?))? *$/
 		roll_string = ''
 		for i in 1..$2.to_i
 			dieroll = rand(6)
-#			STDERR.puts("Rolled: ", die_string[dieroll,1]) #
-			roll_string = "#{roll_string}#{die_string[dieroll,1]} "
+#			STDERR.puts("Rolled: ", SIX_SIDES[dieroll,1]) #
+			roll_string = "#{roll_string}#{SIX_SIDES[dieroll,1]} "
 			total += dieroll
 		end
 
