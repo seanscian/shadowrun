@@ -47,7 +47,7 @@ end
 
 	# Get the channel name, if it exists.
 	# TODO: Sanitize the input.
-channel_query = SQLite3::Database.new('rpdb').execute("select name from channels where name like \"%rp\" and channel is \"#{slack_event["event"]["channel"]}\"")
+channel_query = SQLite3::Database.new('rpdb').execute("select name from channels where name like \"%-rp\" and channel is \"#{slack_event["event"]["channel"]}\"")
 if channel_query.length == 0
 #	STDERR.puts("Anyone can talk here in #{slack_event["event"]["channel"]}") #
 		# Just exit if anyone can talk here; there’s nothing left to do.
