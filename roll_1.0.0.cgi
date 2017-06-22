@@ -78,12 +78,30 @@ when db_config.length == 0
 else
 	db_config = db_config[0][0]
 		# Get the game/character information and GM authorization.
-	game = rpdb.execute("select game from global where config is \"#{db_config}\" limit 1")[0][0]
-	sl_user = rpdb.execute("select charname from characters where config is \"#{db_config}\" and slack_user is \"#{cgi['user_id']}\" limit 1")[0][0]
-	gm_auth = rpdb.execute("select GM from characters where config is \"#{db_config}\" and slack_user is \"#{cgi['user_id']}\" limit 1")[0][0]
-	chat_hook = rpdb.execute("select chat_hook from global where config is \"#{db_config}\" limit 1")[0][0]
-	chat_icon = rpdb.execute("select picture from characters where config is #{db_config} and slack_user is \"#{cgi['user_id']}\" limit 1")[0][0]
-	default_icon = rpdb.execute("select default_icon from global where config is #{db_config}")[0][0]
+	game = rpdb.execute("select game from global where config is \"#{db_config}\" limit 1")[0][0].to_s
+	begin
+		sl_user = rpdb.execute("select charname from characters where config is \"#{db_config}\" and slack_user is \"#{cgi['user_id']}\" limit 1")[0][0].to_s
+	rescue
+		sl_user = cgi['user_name']
+	end
+	begin
+		gm_auth = rpdb.execute("select GM from characters where config is \"#{db_config}\" and slack_user is \"#{cgi['user_id']}\" limit 1")[0][0].to_s
+	rescue
+		gm_auth = ''
+	end
+	begin
+		chat_hook = rpdb.execute("select chat_hook from global where config is \"#{db_config}\" limit 1")[0][0].to_s
+	end
+	begin
+		chat_icon = rpdb.execute("select picture from characters where config is #{db_config} and slack_user is \"#{cgi['user_id']}\" limit 1")[0][0].to_s
+	rescue
+		chat_icon = ''
+	end
+	begin
+		default_icon = rpdb.execute("select default_icon from global where config is #{db_config}")[0][0].to_s
+	rescue
+		default_icon = ''
+	end
 end
 
 	# D6 string, for fun (read: Shadowrun).
