@@ -134,6 +134,7 @@ case "${token}" in
 		'')
 			SL_USER="${user_name}"
 			[ "${channel_name}" != "directmessage" ] && [ "${channel_name}" != "privategroup" ] && >&2 printf 'Unconfigured ID %s (%s) in %s (%s)' "${user_id}" "${user_name}" "${channel_id}" "${channel_name}"
+			exit
 			;;
 		esac
 
