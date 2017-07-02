@@ -134,20 +134,20 @@ when ""
 				},
 				{
 					"mrkdwn_in" => [ "text", "pretext" ],
-					"pretext" => "If you type `#{command} %s smirks.`, it formats your message as an emote, for example:",
+					"pretext" => "*In Progress:* If you type `#{command} %s smirks.`, it formats your message as an emote, for example:",
 					"author_icon" => default_icon,
 					"text" => "_*%s* smirks._"
 				},
 				{
 					"mrkdwn_in" => [ "text", "pretext" ],
-					"pretext" => "The format `#{command} %s We have trouble inbound!` formats your message as a form of group communication (online, telepathic, etc.), like this:",
+					"pretext" => "*In Progress:* The format `#{command} %s We have trouble inbound!` formats your message as a form of group communication (online, telepathic, etc.), like this:",
 					"author_icon" => online_icon.to_s,
 					"author_name" => online_name.to_s,
 					"text" => "formatted text"
 				},
 				{
 					"mrkdwn_in" => [ "text", "pretext" ],
-					"pretext" => "In-character direct messages can be sent to any Slack user when sourced from a game channel by putting `%s @username` after `#{command}`, for example, `#{command} %s @username %s waves frantically.` Messages will be delivered in-character directly to the user and cloned to the sender. Replying to messages cannot be done via slackbot; it *must* be done from a configured gaming channel. This is awkward, but functional.\n\n%s"
+					"pretext" => "*In Progress:* In-character direct messages can be sent to any Slack user when sourced from a game channel by putting `%s @username` after `#{command}`, for example, `#{command} %s @username %s waves frantically.` Messages will be delivered in-character directly to the user and cloned to the sender. Replying to messages cannot be done via slackbot; it *must* be done from a configured gaming channel. This is awkward, but functional.\n\n%s"
 				}
 			]
 	}
@@ -164,21 +164,16 @@ when /^\/gm(?:(\S)(.*?) +(.*?) *)?$/
 		"icon_url" => chat_icon,
 		"text" => text,
 		"channel" => channel_id,
-		"attachments" =>
-			[
-				{
-					"footer" => "%s"
-				}
-			]
+		"attachments" => [ { "footer" => "" } ]
 	}
 	post_message(chat_hook,message)
 when /^(?:(.*?) *)$/
 	message = {
-		"response_type" => "ephemeral",
 		"username" => sl_user,
 		"icon_url" => chat_icon,
 		"text" => text,
 		"channel" => channel_id,
+		"attachments" => [ { "footer" => "" } ]
 	}
 	post_message(chat_hook,message)
 end
