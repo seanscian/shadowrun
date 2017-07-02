@@ -529,125 +529,125 @@ case "${token}" in
 				curl -X POST -H 'Content-type: application/json' --url "${response_url}" --silent --fail --data "${MESSAGE}" &> /dev/null
 			done
 			;;
-		*([0-9])?(+*([0-9]))?( +([0-9]))?( *))	# Test case for pool+edge roller
-			INPUT=( ${text} )			# Initial tokenization
-			declare -ri POOL=${INPUT[0]%%+*}  # left of +
-			declare -ri EDGE=$((${INPUT[0]}-${POOL})) # do math and subtract POOL
-			declare -ri THRESHOLD=$((${INPUT[1]//[^0-9]}))
-
-			[ ${THRESHOLD} -gt 0 ] && STRIP=2 || STRIP=1
-			COMMENT="${INPUT[@]:${STRIP}}"
-			COMMENT="${COMMENT//[*]}"
-			[ ${#COMMENT} -gt 0 ] && COMMENT=" — ${COMMENT}" || COMMENT=''
-
-				# Explosion subroutine, recursing, adding hits, ignoring 1s.
-			explosion() {
-				case $((${RANDOM}%6)) in
-				4)
-					HIT=$((${HIT}+1))
-					;;
-				5)
-					HIT=$((${HIT}+1))
-					explosion		# By probability alone is an endless loop avoided…
-					;;
-				esac
-			}
-
-			for ((ITERATION=1;${ITERATION}<=${ITERATIONS};ITERATION++))
-			do
-				[ ${ITERATIONS} -gt 1 ] && ITER_COMMENT=" #${ITERATION}" || unset ITER_COMMENT
-				COLOR='good'
-				declare -i HIT=0 ONES=0 NET=0 ROLL
-
-				for ((i=0;i<${POOL};i++))
-				do
-					case $((${RANDOM}%6)) in
-					0)
-						ONES=$((${ONES}+1))
-						;;
-					4)
-						HIT=$((${HIT}+1))
-						;;
-					5)
-						HIT=$((${HIT}+1))
-						[ ${EDGE} -gt 0 ] && explosion	# Invoke Rule of Six if Edge was supplied
-						;;
-					esac
-				done
-
-				for ((i=0;i<${EDGE};i++))
-				do
-					case $((${RANDOM}%6)) in
-					0)
-						ONES=$((${ONES}+1))
-						;;
-					4)
-						HIT=$((${HIT}+1))
-						;;
-					5)
-						HIT=$((${HIT}+1))
-						explosion					# Edge dice, so Rule of Six always applies
-						;;
-					esac
-				done
-
-				if [ ${THRESHOLD} -gt 0 ]		# If threshold is known, give a pretty response
-				then
-					if [ ${HIT} -ge ${THRESHOLD} ]
-					then
-						NET=$((${HIT}-${THRESHOLD}))
-						RESULT="Success! "
-						[ ${NET} -ne 1 ] && NET_STRING="${NET} Net Hits." || NET_STRING='1 Net Hit.'
-					else
-						RESULT='Failure.'
-						COLOR='warning'
-					fi
-				else
-					[ ${HIT} -ne 1 ] && RESULT="${HIT} Hits." || RESULT='1 Hit.'
-					[ ${HIT} -eq 0 ] && COLOR='warning'
-				fi
-
-#				>&2 printf 'Ones: %d' ${ONES}
-				if [ ${ONES} -gt $(($((${INPUT[0]}))/2)) ]	# Show (critical) glitch
-				then
-					CGC=1
-					GLITCH=' Glitch!'
-					COLOR='danger'
-					[ ${HIT} -eq 0 ] && CRITICAL=' Critical' && COLOR='000000' && CGC=2
-					[ ${EDGE} -eq 0 ] && CC_BUTTON="$(printf '{"name":"close_call","text":"Close Call","type":"button","value":"%s","confirm":{"title":"Downgrade Glitch?","text":"This will cost you one Edge point.","ok_text":"Yes","dismiss_text":"No"}}' "${COLOR}")"
-				fi
-
-				declare -i MISSES=$((${POOL}+${EDGE}-${HIT}))
-#				SHORTFALL=$((${THRESHOLD}-${HIT}))
-#				[ ${SHORTFALL} -gt 0 ] || unset SHORTFALL
-
-				[ ${MISSES} -eq 1 ] || PLURAL="es"
-
-					# If Edge was not rolled, a Second Chance might be allowed.
-
-					# Defined here because I am doing this in bash, not really building
-					# JSON as a hash or anything, but just making a string. I give Slack
-					# something to parse.
-				COMPARISON=''
-				[ $((${MISSES}*3/2)) -lt $((${POOL})) ] && COMPARISON="below "
-				[ $((${MISSES}*3/2)) -gt $((${POOL})) ] && COMPARISON="above "
-				SECOND_CHANCE='{"name":"no_roll"}'
-				[ ${EDGE} -eq 0 ] && [ ${MISSES} -gt 0 ] && SECOND_CHANCE="$(printf '{"name":"second_chance","text":"Second Chance","type":"button","value":"%s","confirm":{"title":"Reroll %s Misses?","text":"This will cost you one Edge point. %d misses is %saverage if that helps you make up your mind.","ok_text":"Yes","dismiss_text":"No"}}'\
-					"$(printf '%s %d %d %d %d' ${user_id} ${HIT} ${MISSES} ${THRESHOLD} ${CGC})" \
-					${MISSES} ${MISSES} "${COMPARISON}")"
-#					>&2 printf '%s %d %d %d %d' ${user_id} ${HIT} ${MISSES} ${THRESHOLD} ${CGC}
-
-				if [ $((${POOL}+${EDGE})) -ne 0 ]
-				then
-					[ ${THRESHOLD} -gt 0 ] && THRESHOLD_STRING="\nThreshold: ${THRESHOLD}" || THRESHOLD_STRING=''
-					MESSAGE="$(printf '{"response_type":"%s","text":"*%s%s%s*","attachments":[{"thumb_url":"%s","color":"%s","fields":[{"title":"%s%s%s","value":"%s","short":true},{"value":"Pool: %d Edge: %d%s","short":true}],"callback_id":"edge_effect","actions":[%s,%s]}]}' "${RESPONSE}" "${SL_USER}" "${COMMENT}" "${ITER_COMMENT}" "${CHAT_ICON}" "${COLOR}" "${RESULT}" "${CRITICAL}" "${GLITCH}" "${NET_STRING}" ${POOL} ${EDGE} "${THRESHOLD_STRING}" "${SECOND_CHANCE}" "${CC_BUTTON}")"
-				else
-					MESSAGE="$(printf '{"response_type":"ephemeral","text":"%sThe syntax for this `%s` type requires a pool of the format `d+e`, e.g. `%s 5+3`, where 5 is your pool size and 3 is your edge dice.  You can omit either, but not both, e.g. `%s 5` or `%s +2`.\n\nThis `%s` type also accepts an optional threshold, e.g. `%s 10+2 3`\n\nThe color of the sidebar will be green if you rolled hits, yellow if you rolled no hits, and red or black if you glitched (black meaning a critical glitch).  If a threshold was supplied, green indicates success, yellow indicates failure, and red indicates a glitch."}' "${HELP_HEADER}" "${SLASH}" "${SLASH}" "${SLASH}" "${SLASH}" "${SLASH}" "${SLASH}")"
-					ITERATION=${ITERATIONS}
-				fi
-				curl -X POST -H 'Content-type: application/json' --url "${response_url}" --silent --fail --data "${MESSAGE}" &> /dev/null
-			done
-			;;
+#		*([0-9])?(+*([0-9]))?( +([0-9]))?( *))	# Test case for pool+edge roller
+#			INPUT=( ${text} )			# Initial tokenization
+#			declare -ri POOL=${INPUT[0]%%+*}  # left of +
+#			declare -ri EDGE=$((${INPUT[0]}-${POOL})) # do math and subtract POOL
+#			declare -ri THRESHOLD=$((${INPUT[1]//[^0-9]}))
+#
+#			[ ${THRESHOLD} -gt 0 ] && STRIP=2 || STRIP=1
+#			COMMENT="${INPUT[@]:${STRIP}}"
+#			COMMENT="${COMMENT//[*]}"
+#			[ ${#COMMENT} -gt 0 ] && COMMENT=" — ${COMMENT}" || COMMENT=''
+#
+#				# Explosion subroutine, recursing, adding hits, ignoring 1s.
+#			explosion() {
+#				case $((${RANDOM}%6)) in
+#				4)
+#					HIT=$((${HIT}+1))
+#					;;
+#				5)
+#					HIT=$((${HIT}+1))
+#					explosion		# By probability alone is an endless loop avoided…
+#					;;
+#				esac
+#			}
+#
+#			for ((ITERATION=1;${ITERATION}<=${ITERATIONS};ITERATION++))
+#			do
+#				[ ${ITERATIONS} -gt 1 ] && ITER_COMMENT=" #${ITERATION}" || unset ITER_COMMENT
+#				COLOR='good'
+#				declare -i HIT=0 ONES=0 NET=0 ROLL
+#
+#				for ((i=0;i<${POOL};i++))
+#				do
+#					case $((${RANDOM}%6)) in
+#					0)
+#						ONES=$((${ONES}+1))
+#						;;
+#					4)
+#						HIT=$((${HIT}+1))
+#						;;
+#					5)
+#						HIT=$((${HIT}+1))
+#						[ ${EDGE} -gt 0 ] && explosion	# Invoke Rule of Six if Edge was supplied
+#						;;
+#					esac
+#				done
+#
+#				for ((i=0;i<${EDGE};i++))
+#				do
+#					case $((${RANDOM}%6)) in
+#					0)
+#						ONES=$((${ONES}+1))
+#						;;
+#					4)
+#						HIT=$((${HIT}+1))
+#						;;
+#					5)
+#						HIT=$((${HIT}+1))
+#						explosion					# Edge dice, so Rule of Six always applies
+#						;;
+#					esac
+#				done
+#
+#				if [ ${THRESHOLD} -gt 0 ]		# If threshold is known, give a pretty response
+#				then
+#					if [ ${HIT} -ge ${THRESHOLD} ]
+#					then
+#						NET=$((${HIT}-${THRESHOLD}))
+#						RESULT="Success! "
+#						[ ${NET} -ne 1 ] && NET_STRING="${NET} Net Hits." || NET_STRING='1 Net Hit.'
+#					else
+#						RESULT='Failure.'
+#						COLOR='warning'
+#					fi
+#				else
+#					[ ${HIT} -ne 1 ] && RESULT="${HIT} Hits." || RESULT='1 Hit.'
+#					[ ${HIT} -eq 0 ] && COLOR='warning'
+#				fi
+#
+##				>&2 printf 'Ones: %d' ${ONES}
+#				if [ ${ONES} -gt $(($((${INPUT[0]}))/2)) ]	# Show (critical) glitch
+#				then
+#					CGC=1
+#					GLITCH=' Glitch!'
+#					COLOR='danger'
+#					[ ${HIT} -eq 0 ] && CRITICAL=' Critical' && COLOR='000000' && CGC=2
+#					[ ${EDGE} -eq 0 ] && CC_BUTTON="$(printf '{"name":"close_call","text":"Close Call","type":"button","value":"%s","confirm":{"title":"Downgrade Glitch?","text":"This will cost you one Edge point.","ok_text":"Yes","dismiss_text":"No"}}' "${COLOR}")"
+#				fi
+#
+#				declare -i MISSES=$((${POOL}+${EDGE}-${HIT}))
+##				SHORTFALL=$((${THRESHOLD}-${HIT}))
+##				[ ${SHORTFALL} -gt 0 ] || unset SHORTFALL
+#
+#				[ ${MISSES} -eq 1 ] || PLURAL="es"
+#
+#					# If Edge was not rolled, a Second Chance might be allowed.
+#
+#					# Defined here because I am doing this in bash, not really building
+#					# JSON as a hash or anything, but just making a string. I give Slack
+#					# something to parse.
+#				COMPARISON=''
+#				[ $((${MISSES}*3/2)) -lt $((${POOL})) ] && COMPARISON="below "
+#				[ $((${MISSES}*3/2)) -gt $((${POOL})) ] && COMPARISON="above "
+#				SECOND_CHANCE='{"name":"no_roll"}'
+#				[ ${EDGE} -eq 0 ] && [ ${MISSES} -gt 0 ] && SECOND_CHANCE="$(printf '{"name":"second_chance","text":"Second Chance","type":"button","value":"%s","confirm":{"title":"Reroll %s Misses?","text":"This will cost you one Edge point. %d misses is %saverage if that helps you make up your mind.","ok_text":"Yes","dismiss_text":"No"}}'\
+#					"$(printf '%s %d %d %d %d' ${user_id} ${HIT} ${MISSES} ${THRESHOLD} ${CGC})" \
+#					${MISSES} ${MISSES} "${COMPARISON}")"
+##					>&2 printf '%s %d %d %d %d' ${user_id} ${HIT} ${MISSES} ${THRESHOLD} ${CGC}
+#
+#				if [ $((${POOL}+${EDGE})) -ne 0 ]
+#				then
+#					[ ${THRESHOLD} -gt 0 ] && THRESHOLD_STRING="\nThreshold: ${THRESHOLD}" || THRESHOLD_STRING=''
+#					MESSAGE="$(printf '{"response_type":"%s","text":"*%s%s%s*","attachments":[{"thumb_url":"%s","color":"%s","fields":[{"title":"%s%s%s","value":"%s","short":true},{"value":"Pool: %d Edge: %d%s","short":true}],"callback_id":"edge_effect","actions":[%s,%s]}]}' "${RESPONSE}" "${SL_USER}" "${COMMENT}" "${ITER_COMMENT}" "${CHAT_ICON}" "${COLOR}" "${RESULT}" "${CRITICAL}" "${GLITCH}" "${NET_STRING}" ${POOL} ${EDGE} "${THRESHOLD_STRING}" "${SECOND_CHANCE}" "${CC_BUTTON}")"
+#				else
+#					MESSAGE="$(printf '{"response_type":"ephemeral","text":"%sThe syntax for this `%s` type requires a pool of the format `d+e`, e.g. `%s 5+3`, where 5 is your pool size and 3 is your edge dice.  You can omit either, but not both, e.g. `%s 5` or `%s +2`.\n\nThis `%s` type also accepts an optional threshold, e.g. `%s 10+2 3`\n\nThe color of the sidebar will be green if you rolled hits, yellow if you rolled no hits, and red or black if you glitched (black meaning a critical glitch).  If a threshold was supplied, green indicates success, yellow indicates failure, and red indicates a glitch."}' "${HELP_HEADER}" "${SLASH}" "${SLASH}" "${SLASH}" "${SLASH}" "${SLASH}" "${SLASH}")"
+#					ITERATION=${ITERATIONS}
+#				fi
+#				curl -X POST -H 'Content-type: application/json' --url "${response_url}" --silent --fail --data "${MESSAGE}" &> /dev/null
+#			done
+#			;;
 		?([1-9]*([0-9]))d[1-9]*([0-9])?([+-][1-9]*([0-9]))?( *))	# Test case for NdX±Y
 
 			# If N is absent, assume single die, e.g. d6 = 1d6
