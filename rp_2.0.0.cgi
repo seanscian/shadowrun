@@ -51,8 +51,8 @@ else
 end
 
 	# Sanitize channel_id, user_id
-channel_id = cgi["channel_id"].gsub(/[^0-9A-Za-z]/, '')
-channel_id = channel_id[0,9]
+$channel_id = cgi["channel_id"].gsub(/[^0-9A-Za-z]/, '')
+$channel_id = $channel_id[0,9]
 
 user_id = cgi["user_id"].gsub(/[^0-9A-Za-z]/, '')
 user_id = user_id[0,9]
@@ -60,7 +60,7 @@ user_id = user_id[0,9]
 text = cgi['text']
 sl_user = cgi['user_name']
 
-db_config = rpdb.execute("select config from channels where channel is \"#{cgi["channel_id"]}\" limit 1")
+db_config = rpdb.execute("select config from channels where channel is \"#{$channel_id}\" limit 1")
 
 case
 when db_config.length == 0
@@ -79,7 +79,7 @@ else
 	name_pattern = rpdb.execute("SELECT DISTINCT charname FROM characters WHERE config IS #{db_config} AND slack_user IS NOT \"#{user_id}\" and GM is null")
 end
 
-emote_name = /^(.*?) .*$/.match(sl_user)[1]
+$emote_name = /^(\w+)/.match(sl_user)[1]
 
 if chat_icon.to_s == ''
 	chat_icon = $default_icon
@@ -108,12 +108,26 @@ def mention(message)
 	name_pattern = rpdb.execute("SELECT DISTINCT charname FROM characters WHERE config IS #{db_config} AND slack_user IS NOT \"#{user_id}\" and GM is null")
 end
 
-def chatter(username,icon_url,text,channel,priv_footer)
+def chatter(username,icon_url,text,priv_footer)
 	message = {
 		"username" => username,
 		"icon_url" => icon_url,
 		"text" => text,
-		"channel" => channel,
+		"channel" => $channel_id,
+		"attachments" => [ { "footer" => priv_footer } ]
+	}
+	post_message($chat_hook,message)
+end
+
+def emoter(text,priv_footer)
+	text = text.gsub('/me',$emote_name.to_s)
+	text = text.gsub('_','')
+	text = text.gsub($emote_name.to_s,"*#{$emote_name.to_s}*")
+	message = {
+		"username" => "­",
+		"icon_url" => $default_icon,
+		"text" => "_#{text}_",
+		"channel" => $channel_id,
 		"attachments" => [ { "footer" => priv_footer } ]
 	}
 	post_message($chat_hook,message)
@@ -167,22 +181,12 @@ when /^\/gm(?:(\S)(.*?) +(.*?) *)?$/
 		"username" => sl_user,
 		"icon_url" => chat_icon,
 		"text" => text,
-		"channel" => channel_id,
+		"channel" => $channel_id,
 		"attachments" => [ { "footer" => "" } ]
 	}
 	post_message($chat_hook,message)
 when /^(\/me .*?) *$/
-	emote = $1.gsub('/me',emote_name.to_s)
-	emote = emote.gsub('_','')
-	emote = emote.gsub(emote_name.to_s,"*#{emote_name.to_s}*")
-	message = {
-		"username" => "­",
-		"icon_url" => $default_icon,
-		"text" => "_#{emote}_",
-		"channel" => channel_id,
-		"attachments" => [ { "footer" => "" } ]
-	}
-	post_message($chat_hook,message)
+	emoter($1.to_s,nil)
 when /^(?:(.*?) *)$/
-	chatter(sl_user,chat_icon,$1.to_s,channel_id,nil)
+	chatter(sl_user,chat_icon,$1.to_s,nil)
 end
