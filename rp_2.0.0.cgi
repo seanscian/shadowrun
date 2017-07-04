@@ -29,10 +29,10 @@ database = 'rpdb'
 	# Sanitize the input token, though the database *file* permissions are read-
 	# only, so there shouldn’t be anything that can damage the database, but
 	# I would like to avoid anything like shell scriping or other injections.
-STDERR.puts("Received: #{cgi["token"]}") #
+#STDERR.puts("Received: #{cgi["token"]}") #
 token = cgi["token"].gsub(/[^0-9A-Za-z]/, '')
 token = token[0,24]
-STDERR.puts("Current: #{token}") #
+#STDERR.puts("Current: #{token}") #
 
 	# Use SQLite to see if the token we receive is in the database.
 	#    Does anyone have a better idea than this? I don’t care about the
@@ -47,7 +47,7 @@ if rpdb.execute("select token from tokens where token is \"#{token}\"").length =
 	STDERR.puts('You’re not supposed to be here.')
 	exit
 else
-	STDERR.puts('PLAYER ONE HAS ENTERED THE GAME!') #
+#	STDERR.puts('PLAYER ONE HAS ENTERED THE GAME!') #
 end
 
 	# Sanitize channel_id, user_id
@@ -58,16 +58,6 @@ user_id = cgi["user_id"].gsub(/[^0-9A-Za-z]/, '')
 user_id = user_id[0,9]
 
 text = cgi['text']
-
-case cgi["command"]
-when "/mroll"
-	capture = /^([1-9]{1})(?![0-9])  *(.*?) *$/.match(text)
-	iterations = capture[1].to_i or STDERR.puts "Bad /mroll"
-	text = capture[2] or STDERR.puts "Bad /mroll"
-else
-	iterations = 1
-end
-
 sl_user = cgi['user_name']
 
 db_config = rpdb.execute("select config from channels where channel is \"#{cgi["channel_id"]}\" limit 1")
@@ -86,15 +76,14 @@ else
 	default_icon = rpdb.execute("select default_icon from global where config is #{db_config}")[0][0]
 	online_icon = rpdb.execute("select icon from online where config is #{db_config}")[0][0]
 	online_name = rpdb.execute("select name from online where config is #{db_config}")[0][0]
+	name_pattern = rpdb.execute("SELECT DISTINCT charname FROM characters WHERE config IS #{db_config} AND slack_user IS NOT \"#{user_id}\" and GM is null")
 end
 
-	# D6 string, for fun (read: Shadowrun).
-SIX_SIDES = "⚀⚁⚂⚃⚄⚅"
+emote_name = /^(.*?) .*$/.match(sl_user)[1]
 
-#case sl_user
-#when ""
-#	channel_name != 'directmessage' && STDERR.puts("Unconfigured ID #{cgi['user_id']} (#{cgi['user_name']}) in #{cgi['channel_id']} (#{cgi['channel_name']})")
-#end
+if chat_icon.to_s == ''
+	chat_icon = default_icon
+end
 
 help_header = "*#{game} In-Character Chat #{$PROGRAM_NAME.gsub(/.*_|.cgi/, '')} in-line help*\n"
 
@@ -113,6 +102,10 @@ def post_message(url,message)
 
 	response = http.request(request)
 #	STDERR.puts(response.body) #
+end
+
+def mention(message)
+	name_pattern = rpdb.execute("SELECT DISTINCT charname FROM characters WHERE config IS #{db_config} AND slack_user IS NOT \"#{user_id}\" and GM is null")
 end
 
 command = cgi["command"]
@@ -167,11 +160,24 @@ when /^\/gm(?:(\S)(.*?) +(.*?) *)?$/
 		"attachments" => [ { "footer" => "" } ]
 	}
 	post_message(chat_hook,message)
+when /^(\/me .*?) *$/
+	emote = $1.gsub('/me',emote_name.to_s)
+	emote = emote.gsub('_','')
+	emote = emote.gsub(emote_name.to_s,"*#{emote_name.to_s}*")
+	emote = "_#{emote}_"
+	message = {
+		"username" => "­",
+		"icon_url" => chat_icon,
+		"text" => emote,
+		"channel" => channel_id,
+		"attachments" => [ { "footer" => "" } ]
+	}
+	post_message(chat_hook,message)
 when /^(?:(.*?) *)$/
 	message = {
 		"username" => sl_user,
 		"icon_url" => chat_icon,
-		"text" => text,
+		"text" => $1.to_s,
 		"channel" => channel_id,
 		"attachments" => [ { "footer" => "" } ]
 	}
