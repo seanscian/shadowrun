@@ -71,9 +71,9 @@ else
 	game = rpdb.execute("select game from global where config is \"#{db_config}\" limit 1")[0][0]
 	sl_user = rpdb.execute("select charname from characters where config is \"#{db_config}\" and slack_user is \"#{user_id}\" limit 1")[0][0]
 	gm_auth = rpdb.execute("select GM from characters where config is \"#{db_config}\" and slack_user is \"#{cgi['user_id']}\" limit 1")[0][0]
-	chat_hook = rpdb.execute("select chat_hook from global where config is \"#{db_config}\" limit 1")[0][0]
+	$chat_hook = rpdb.execute("select chat_hook from global where config is \"#{db_config}\" limit 1")[0][0]
 	chat_icon = rpdb.execute("select picture from characters where config is #{db_config} and slack_user is \"#{cgi['user_id']}\" limit 1")[0][0]
-	default_icon = rpdb.execute("select default_icon from global where config is #{db_config}")[0][0]
+	$default_icon = rpdb.execute("select default_icon from global where config is #{db_config}")[0][0]
 	online_icon = rpdb.execute("select icon from online where config is #{db_config}")[0][0]
 	online_name = rpdb.execute("select name from online where config is #{db_config}")[0][0]
 	name_pattern = rpdb.execute("SELECT DISTINCT charname FROM characters WHERE config IS #{db_config} AND slack_user IS NOT \"#{user_id}\" and GM is null")
@@ -82,7 +82,7 @@ end
 emote_name = /^(.*?) .*$/.match(sl_user)[1]
 
 if chat_icon.to_s == ''
-	chat_icon = default_icon
+	chat_icon = $default_icon
 end
 
 help_header = "*#{game} In-Character Chat #{$PROGRAM_NAME.gsub(/.*_|.cgi/, '')} in-line help*\n"
@@ -108,6 +108,17 @@ def mention(message)
 	name_pattern = rpdb.execute("SELECT DISTINCT charname FROM characters WHERE config IS #{db_config} AND slack_user IS NOT \"#{user_id}\" and GM is null")
 end
 
+def chatter(username,icon_url,text,channel,priv_footer)
+	message = {
+		"username" => username,
+		"icon_url" => icon_url,
+		"text" => text,
+		"channel" => channel,
+		"attachments" => [ { "footer" => priv_footer } ]
+	}
+	post_message($chat_hook,message)
+end
+
 command = cgi["command"]
 
 case text
@@ -128,7 +139,7 @@ when ""
 				{
 					"mrkdwn_in" => [ "text", "pretext" ],
 					"pretext" => "*In Progress:* If you type `#{command} %s smirks.`, it formats your message as an emote, for example:",
-					"author_icon" => default_icon,
+					"author_icon" => $default_icon,
 					"text" => "_*%s* smirks._"
 				},
 				{
@@ -159,27 +170,19 @@ when /^\/gm(?:(\S)(.*?) +(.*?) *)?$/
 		"channel" => channel_id,
 		"attachments" => [ { "footer" => "" } ]
 	}
-	post_message(chat_hook,message)
+	post_message($chat_hook,message)
 when /^(\/me .*?) *$/
 	emote = $1.gsub('/me',emote_name.to_s)
 	emote = emote.gsub('_','')
 	emote = emote.gsub(emote_name.to_s,"*#{emote_name.to_s}*")
-	emote = "_#{emote}_"
 	message = {
 		"username" => "­",
-		"icon_url" => chat_icon,
-		"text" => emote,
+		"icon_url" => $default_icon,
+		"text" => "_#{emote}_",
 		"channel" => channel_id,
 		"attachments" => [ { "footer" => "" } ]
 	}
-	post_message(chat_hook,message)
+	post_message($chat_hook,message)
 when /^(?:(.*?) *)$/
-	message = {
-		"username" => sl_user,
-		"icon_url" => chat_icon,
-		"text" => $1.to_s,
-		"channel" => channel_id,
-		"attachments" => [ { "footer" => "" } ]
-	}
-	post_message(chat_hook,message)
+	chatter(sl_user,chat_icon,$1.to_s,channel_id,nil)
 end
