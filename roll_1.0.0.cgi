@@ -108,11 +108,6 @@ end
 	# D6 string, for fun (read: Shadowrun).
 SIX_SIDES = "⚀⚁⚂⚃⚄⚅"
 
-#case sl_user
-#when ""
-#	channel_name != 'directmessage' && STDERR.puts("Unconfigured ID #{cgi['user_id']} (#{cgi['user_name']}) in #{cgi['channel_id']} (#{cgi['channel_name']})")
-#end
-
 help_header = "*#{game} Roller #{$PROGRAM_NAME.gsub(/.*_|.cgi/, '')} in-line help*\n"
 
 	# There’s going to be a lot of posting JSON to Slack.
