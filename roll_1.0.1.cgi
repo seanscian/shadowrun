@@ -104,6 +104,7 @@ else
 	end
 end
 
+	chat_icon == '' && chat_icon = default_icon
 	# D6 string, for fun (read: Shadowrun).
 SIX_SIDES = "⚀⚁⚂⚃⚄⚅"
 
