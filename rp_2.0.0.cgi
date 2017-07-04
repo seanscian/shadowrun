@@ -135,9 +135,13 @@ end
 
 command = cgi["command"]
 
+gm_help = ''
+if gm_auth.to_s.length > 0
+	gm_help = "\n\nAs an authorized GM, you have access to the `#{command} /gm` sub-command."
+end
+
 case text
 when ""
-#	STDERR.puts('Display Help.') #
 	message = {
 		"response_type" => "ephemeral",
 		"text" => help_header,
@@ -152,9 +156,10 @@ when ""
 				},
 				{
 					"mrkdwn_in" => [ "text", "pretext" ],
-					"pretext" => "*In Progress:* If you type `#{command} %s smirks.`, it formats your message as an emote, for example:",
+					"pretext" => "If you type `#{command} /me smirks.`, it formats your message as an emote, for example:",
+					"author_name" => "­",
 					"author_icon" => $default_icon,
-					"text" => "_*%s* smirks._"
+					"text" => "_*#{$emote_name}* smirks._"
 				},
 				{
 					"mrkdwn_in" => [ "text", "pretext" ],
@@ -165,26 +170,22 @@ when ""
 				},
 				{
 					"mrkdwn_in" => [ "text", "pretext" ],
-					"pretext" => "*In Progress:* In-character direct messages can be sent to any Slack user when sourced from a game channel by putting `%s @username` after `#{command}`, for example, `#{command} %s @username %s waves frantically.` Messages will be delivered in-character directly to the user and cloned to the sender. Replying to messages cannot be done via slackbot; it *must* be done from a configured gaming channel. This is awkward, but functional.\n\n%s"
+					"pretext" => "*In Progress:* In-character direct messages can be sent to any Slack user when sourced from a game channel by putting `/msg @username` after `#{command}`, for example, `#{command} /msg @username /me waves frantically.` Messages will be delivered in-character directly to the user and cloned to the sender. Replying to messages cannot be done via slackbot; it *must* be done from a configured gaming channel. This is awkward, but functional.#{gm_help}"
 				}
 			]
 	}
 
 	post_message(cgi["response_url"],message)
 when /^\/gm(?:(\S)(.*?) +(.*?) *)?$/
-#	STDERR.puts("found gm chat: #{text}") #
-#	STDERR.puts("Separator: #{$1}") #
-#	STDERR.puts("Alternative Name: ", $2.gsub($1,' ')) #
-#	STDERR.puts("Message: #{$3}") #
-
-	message = {
-		"username" => sl_user,
-		"icon_url" => chat_icon,
-		"text" => text,
-		"channel" => $channel_id,
-		"attachments" => [ { "footer" => "" } ]
-	}
-	post_message($chat_hook,message)
+	sl_user = $2.gsub($1,' ')
+	case $3.to_s
+	when /^(\/me .*?) *$/
+		STDERR.puts("first match: #{$1}")
+		emoter($1.to_s,nil)
+	when /^(?:(.*?) *)$/
+		STDERR.puts("first match: #{$1}")
+		chatter(sl_user,$default_icon,$1.to_s,nil)
+	end
 when /^(\/me .*?) *$/
 	emoter($1.to_s,nil)
 when /^(?:(.*?) *)$/
