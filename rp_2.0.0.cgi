@@ -136,40 +136,7 @@ end
 command = cgi["command"]
 
 if gm_auth.to_s.length > 0
-	gm_help = "As an authorized GM, you have access to the `#{command} /gm` sub-command. This allows the GM use an arbitrary name in a message.\n\n`/gm_Character_Name Message text goes here.`\n\nThe `gm_` will be stripped and all underscores in the remaining `Character_Name` will be converted to a whitespace, e.g. `#{command} /gm_Character_Name This is a message.`"
-#		{
-#			"mrkdwn_in" => [ "text", "pretext" ],
-#			"pretext" => "As an authorized GM, you have access to the `#{command} /gm` sub-command. This allows the GM use an arbitrary name in a message.\n\n`/gm_Character_Name Message text goes here.`\n\nThe `gm_` will be stripped and all underscores in the remaining `Character_Name` will be converted to a whitespace, e.g. `#{command} /gm_Character_Name This is a message.` will display like this:",
-#			"author_name" => "Character Name",
-#			"text" => "This is a message.",
-#			"author_icon" => "%s"
-#		}
-#		{
-#			"mrkdwn_in" => [ "text", "pretext" ],
-#			"pretext" => "To display character names with underscores in them, use a character other than an underscore after `%s`, e.g. `%s!The!big_SMALL Your message.` will display like this:",
-#			"author_name" => "The big_SMALL",
-#			"text" => "Your message.",
-#			"author_icon" => "%s"
-#		},
-#		{
-#			"mrkdwn_in" => [ "pretext", "text" ],
-#			"X-pretext" => "If you provide no character name, the text will post with “%s” as the sender, like this: `%s This is a message.`",
-#			"X-author_name" => "%s",
-#			"X-text" => "This is a message.",
-#			"author_icon" => "%s"
-#		},
-#		{
-#			"mrkdwn_in" => [ "pretext", "text" ],
-#			"pretext" => "Like the non-GM version, `%s` accepts the `%s` for an emote and `%s` for group communication (online, telepathic, etc.), e.g. `%s_Mr._Johnson %s seethes with unbridled hatred.` will display like this:",
-#			"author_name" => "­",
-#			"text" => "_*Mr. Johnson* seethes with unbridled hatred._",
-#			"author_icon" => "%s"
-#		}
-#	gm_help = "\n\nAs an authorized GM, you have access to the `#{command} /gm` sub-command. This allows the GM use an arbitrary name in a message.\n\n`/gm_Character_Name Message text goes here.`\n\nThe `gm_` will be stripped and all underscores in the remaining `Character_Name` will be converted to a whitespace, e.g. `#{command} /gm_Character_Name This is a message.` will display like this:","attachments" => [{"mrkdwn_in" => ["text","pretext"],"author_name" => "Character Name","text" => "This is a message.","author_icon" => "%s"},{"mrkdwn_in" => ["text","pretext"],"pretext" => "To display character names with underscores in them, use a character other than an underscore after `%s`, e.g. `%s!The!big_SMALL Your message.` will display like this:","author_name" => "The big_SMALL","text" => "Your message.","author_icon" => "%s"},{"mrkdwn_in" => ["pretext","text"],"pretext" => "If you provide no character name, the text will post with “%s” as the sender, like this: `%s This is a message.`","author_name" => "%s","text" => "This is a message.","author_icon" => "%s"},{"mrkdwn_in" => ["pretext","text"],"pretext" => "Like the non-GM version, `%s` accepts the `%s` for an emote and `%s` for group communication (online, telepathic, etc.), e.g. `%s_Mr._Johnson %s seethes with unbridled hatred.` will display like this:","author_name" => "­","text" => "_*Mr. Johnson* seethes with unbridled hatred._","author_icon" => "%s"
-
-
-
-
+	gm_help = "As an authorized GM, you have access to the `#{command} /gm` sub-command, allowing a GM to use an arbitrary name in a message. Type `#{command} /gm` for additional help."
 else
 	gm_help = ''
 end
@@ -222,7 +189,37 @@ when /^\/gm(.*)/
 		when ""
 			message = {
 				"response_type" => "ephemeral",
-				"text" => "I’ll get some help here soon."
+				"text" => "This allows the GM use an arbitrary name in a message.\n\n`/gm_Character_Name Message text goes here.`\n\nThe `gm_` will be stripped and all underscores in the remaining `Character_Name` will be converted to a whitespace, e.g. `#{command} /gm_Character_Name This is a message.` will display like this:",
+				"attachments" =>
+					[
+						{
+							"mrkdwn_in" => [ "text", "pretext" ],
+							"author_name" => "Character Name",
+							"text" => "This is a message.",
+							"author_icon" => $default_icon
+						},
+						{
+							"mrkdwn_in" => [ "text", "pretext" ],
+							"pretext" => "To display character names with underscores in them, use a character other than an underscore after `/gm`, e.g. `/gm!The!big_SMALL Your message.` will display like this:",
+							"author_name" => "The big_SMALL",
+							"text" => "Your message.",
+							"author_icon" => $default_icon
+						},
+#						{
+#							"mrkdwn_in" => [ "pretext", "text" ],
+#							"pretext" => "If you provide no character name, the text will post with “%s” as the sender, like this: `%s This is a message.`",
+#							"author_name" => "%s",
+#							"text" => "This is a message.",
+#							"author_icon" => $default_icon
+#						},
+						{
+							"mrkdwn_in" => [ "pretext", "text" ],
+							"pretext" => "Like the non-GM version, `/gm` accepts the `/me` for an emote (and, soon, group communication), e.g. `/rp /gm_Mr._Johnson /me seethes with unbridled hatred.` will display like this:",
+							"author_name" => "­",
+							"text" => "_*Mr. Johnson* seethes with unbridled hatred._",
+							"author_icon" => $default_icon
+						}
+					]
 			}
 			post_message(cgi["response_url"],message)
 			exit
