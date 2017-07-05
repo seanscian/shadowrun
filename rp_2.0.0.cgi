@@ -79,7 +79,7 @@ else
 	name_pattern = rpdb.execute("SELECT DISTINCT charname FROM characters WHERE config IS #{db_config} AND slack_user IS NOT \"#{user_id}\" and GM is null")
 end
 
-$emote_name = /^(\w+)/.match(sl_user)[1]
+emote_name = /^(\w+)/.match(sl_user)[1]
 
 if chat_icon.to_s == ''
 	chat_icon = $default_icon
@@ -119,10 +119,10 @@ def chatter(username,icon_url,text,priv_footer)
 	post_message($chat_hook,message)
 end
 
-def emoter(text,priv_footer)
-	text = text.gsub('/me',$emote_name.to_s)
+def emoter(emote_name,text,priv_footer)
+	text = text.gsub('/me',emote_name.to_s)
 	text = text.gsub('_','')
-	text = text.gsub($emote_name.to_s,"*#{$emote_name.to_s}*")
+	text = text.gsub(emote_name.to_s,"*#{emote_name.to_s}*")
 	message = {
 		"username" => "­",
 		"icon_url" => $default_icon,
@@ -135,9 +135,11 @@ end
 
 command = cgi["command"]
 
-gm_help = ''
 if gm_auth.to_s.length > 0
+	# Until this works, don’t bother telling GMs they can do it.
 	gm_help = "\n\nAs an authorized GM, you have access to the `#{command} /gm` sub-command."
+else
+	gm_help = ''
 end
 
 case text
@@ -159,7 +161,7 @@ when ""
 					"pretext" => "If you type `#{command} /me smirks.`, it formats your message as an emote, for example:",
 					"author_name" => "­",
 					"author_icon" => $default_icon,
-					"text" => "_*#{$emote_name}* smirks._"
+					"text" => "_*#{emote_name}* smirks._"
 				},
 				{
 					"mrkdwn_in" => [ "text", "pretext" ],
@@ -176,18 +178,32 @@ when ""
 	}
 
 	post_message(cgi["response_url"],message)
+	exit
 when /^\/gm(?:(\S)(.*?) +(.*?) *)?$/
-	sl_user = $2.gsub($1,' ')
-	case $3.to_s
-	when /^(\/me .*?) *$/
-		STDERR.puts("first match: #{$1}")
-		emoter($1.to_s,nil)
-	when /^(?:(.*?) *)$/
-		STDERR.puts("first match: #{$1}")
-		chatter(sl_user,$default_icon,$1.to_s,nil)
+	if gm_auth.to_s.length > 0
+		the_rest = $3.to_s
+		sl_user = $2.gsub($1,' ')
+		case the_rest
+		when /^(\/me .*?) *$/
+			capture = /^(\/me .*?) *$/.match(the_rest)
+			emoter(sl_user,capture[1].to_s,nil)
+		when /^(?:(.*?) *)$/
+			capture = /^(?:(.*?) *)$/.match(the_rest)
+			chatter(sl_user,$default_icon,capture[1].to_s,nil)
+		end
+		exit
+	else
+		message = {
+			"response_type" => "ephemeral",
+			"text" => "You are not a GM on this channel."
+		}
+		post_message(cgi["response_url"],message)
+		exit
 	end
 when /^(\/me .*?) *$/
-	emoter($1.to_s,nil)
+	emoter(emote_name,$1.to_s,nil)
+	exit
 when /^(?:(.*?) *)$/
 	chatter(sl_user,chat_icon,$1.to_s,nil)
+	exit
 end
