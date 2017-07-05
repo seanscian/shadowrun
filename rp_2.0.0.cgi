@@ -136,8 +136,40 @@ end
 command = cgi["command"]
 
 if gm_auth.to_s.length > 0
-	# Until this works, don’t bother telling GMs they can do it.
-	gm_help = "\n\nAs an authorized GM, you have access to the `#{command} /gm` sub-command."
+	gm_help = "As an authorized GM, you have access to the `#{command} /gm` sub-command. This allows the GM use an arbitrary name in a message.\n\n`/gm_Character_Name Message text goes here.`\n\nThe `gm_` will be stripped and all underscores in the remaining `Character_Name` will be converted to a whitespace, e.g. `#{command} /gm_Character_Name This is a message.`"
+#		{
+#			"mrkdwn_in" => [ "text", "pretext" ],
+#			"pretext" => "As an authorized GM, you have access to the `#{command} /gm` sub-command. This allows the GM use an arbitrary name in a message.\n\n`/gm_Character_Name Message text goes here.`\n\nThe `gm_` will be stripped and all underscores in the remaining `Character_Name` will be converted to a whitespace, e.g. `#{command} /gm_Character_Name This is a message.` will display like this:",
+#			"author_name" => "Character Name",
+#			"text" => "This is a message.",
+#			"author_icon" => "%s"
+#		}
+#		{
+#			"mrkdwn_in" => [ "text", "pretext" ],
+#			"pretext" => "To display character names with underscores in them, use a character other than an underscore after `%s`, e.g. `%s!The!big_SMALL Your message.` will display like this:",
+#			"author_name" => "The big_SMALL",
+#			"text" => "Your message.",
+#			"author_icon" => "%s"
+#		},
+#		{
+#			"mrkdwn_in" => [ "pretext", "text" ],
+#			"X-pretext" => "If you provide no character name, the text will post with “%s” as the sender, like this: `%s This is a message.`",
+#			"X-author_name" => "%s",
+#			"X-text" => "This is a message.",
+#			"author_icon" => "%s"
+#		},
+#		{
+#			"mrkdwn_in" => [ "pretext", "text" ],
+#			"pretext" => "Like the non-GM version, `%s` accepts the `%s` for an emote and `%s` for group communication (online, telepathic, etc.), e.g. `%s_Mr._Johnson %s seethes with unbridled hatred.` will display like this:",
+#			"author_name" => "­",
+#			"text" => "_*Mr. Johnson* seethes with unbridled hatred._",
+#			"author_icon" => "%s"
+#		}
+#	gm_help = "\n\nAs an authorized GM, you have access to the `#{command} /gm` sub-command. This allows the GM use an arbitrary name in a message.\n\n`/gm_Character_Name Message text goes here.`\n\nThe `gm_` will be stripped and all underscores in the remaining `Character_Name` will be converted to a whitespace, e.g. `#{command} /gm_Character_Name This is a message.` will display like this:","attachments" => [{"mrkdwn_in" => ["text","pretext"],"author_name" => "Character Name","text" => "This is a message.","author_icon" => "%s"},{"mrkdwn_in" => ["text","pretext"],"pretext" => "To display character names with underscores in them, use a character other than an underscore after `%s`, e.g. `%s!The!big_SMALL Your message.` will display like this:","author_name" => "The big_SMALL","text" => "Your message.","author_icon" => "%s"},{"mrkdwn_in" => ["pretext","text"],"pretext" => "If you provide no character name, the text will post with “%s” as the sender, like this: `%s This is a message.`","author_name" => "%s","text" => "This is a message.","author_icon" => "%s"},{"mrkdwn_in" => ["pretext","text"],"pretext" => "Like the non-GM version, `%s` accepts the `%s` for an emote and `%s` for group communication (online, telepathic, etc.), e.g. `%s_Mr._Johnson %s seethes with unbridled hatred.` will display like this:","author_name" => "­","text" => "_*Mr. Johnson* seethes with unbridled hatred._","author_icon" => "%s"
+
+
+
+
 else
 	gm_help = ''
 end
@@ -172,24 +204,38 @@ when ""
 				},
 				{
 					"mrkdwn_in" => [ "text", "pretext" ],
-					"pretext" => "*In Progress:* In-character direct messages can be sent to any Slack user when sourced from a game channel by putting `/msg @username` after `#{command}`, for example, `#{command} /msg @username /me waves frantically.` Messages will be delivered in-character directly to the user and cloned to the sender. Replying to messages cannot be done via slackbot; it *must* be done from a configured gaming channel. This is awkward, but functional.#{gm_help}"
+					"X-pretext" => "*In Progress:* In-character direct messages can be sent to any Slack user when sourced from a game channel by putting `/msg @username` after `#{command}`, for example, `#{command} /msg @username /me waves frantically.` Messages will be delivered in-character directly to the user and cloned to the sender. Replying to messages cannot be done via slackbot; it *must* be done from a configured gaming channel. This is awkward, but functional."
+				},
+				{
+					"mrkdwn_in" => [ "text", "pretext" ],
+					"pretext" => gm_help
 				}
 			]
 	}
 
 	post_message(cgi["response_url"],message)
 	exit
-when /^\/gm(?:(\S)(.*?) +(.*?) *)?$/
+when /^\/gm(.*)/
+	gm_text = /\S.*? +.*? *$/.match($1)
 	if gm_auth.to_s.length > 0
-		the_rest = $3.to_s
-		sl_user = $2.gsub($1,' ')
-		case the_rest
-		when /^(\/me .*?) *$/
-			capture = /^(\/me .*?) *$/.match(the_rest)
-			emoter(sl_user,capture[1].to_s,nil)
-		when /^(?:(.*?) *)$/
-			capture = /^(?:(.*?) *)$/.match(the_rest)
-			chatter(sl_user,$default_icon,capture[1].to_s,nil)
+		case gm_text.to_s
+		when ""
+			message = {
+				"response_type" => "ephemeral",
+				"text" => "I’ll get some help here soon."
+			}
+			post_message(cgi["response_url"],message)
+			exit
+		when /^\S.*? +\/me .*? *$/
+			emote_text = /^(\S)(.*?) +(\/me .*?) *$/.match(gm_text.to_s)
+			sl_user = emote_text[2].gsub(emote_text[1],' ')
+			emoter(sl_user,emote_text[3].to_s,nil)
+			exit
+		when /^\S.*? +(?:.*? *)$/
+			chat_text = /^(\S)(.*?) +(?:(.*?) *)$/.match(gm_text.to_s)
+			sl_user = chat_text[2].gsub(chat_text[1],' ')
+			chatter(sl_user,$default_icon,chat_text[3].to_s,nil)
+			exit
 		end
 		exit
 	else
