@@ -79,7 +79,7 @@ else
 	name_pattern = $rpdb.execute("SELECT DISTINCT charname FROM characters WHERE config IS #{$db_config} AND slack_user IS NOT \"#{$user_id}\" and GM is null")
 end
 
-emote_name = /^(\w+)/.match(sl_user)[1]
+$emote_name = /^(\w+)/.match(sl_user)[1]
 
 if chat_icon.to_s == ''
 	chat_icon = $default_icon
@@ -104,12 +104,30 @@ def post_message(url,message)
 #	STDERR.puts(response.body) #
 end
 
-def mention(message)
-	name_pattern = $rpdb.execute("SELECT DISTINCT substr(trim(charname),1,instr(trim(charname)||' ',' ')-1) FROM characters WHERE config IS #{$db_config} AND slack_user IS NOT \"#{$user_id}\" and GM is null")
-	STDERR.puts name_pattern.to_s
+	# Receives a string of text to search for character names. highlight is true/false.
+def mention(message,highlight)
+	$rpdb.execute("SELECT DISTINCT substr(trim(charname),1,instr(trim(charname)||' ',' ')-1) FROM characters WHERE config IS #{$db_config} AND slack_user IS NOT \"#{$user_id}\" and GM is null").each {
+		|x|
+		if /\b#{x[0]}\b/.match(message.to_s)
+			$rpdb.execute("SELECT DISTINCT slack_user FROM characters WHERE charname LIKE \"#{x[0]}%\" AND config IS #{$db_config}").each {
+				|n|
+#				STDERR.puts("notify #{n}")
+				notify_message = {
+					"text" => "#{x[0]} was mentioned by #{$emote_name} in ##{$channel_id}.",
+					"channel" => n[0]
+				}
+				STDERR.puts notify_message
+			}
+			if highlight == true
+				message = message.gsub(x[0],"*#{x[0]}*")
+			end
+		end
+	}
+	return message
 end
 
 def chatter(username,icon_url,text,priv_footer)
+	mention(text,false)
 	message = {
 		"username" => username,
 		"icon_url" => icon_url,
@@ -117,7 +135,6 @@ def chatter(username,icon_url,text,priv_footer)
 		"channel" => $channel_id,
 		"attachments" => [ { "footer" => priv_footer } ]
 	}
-	mention(message)
 	post_message($chat_hook,message)
 end
 
@@ -125,6 +142,7 @@ def emoter(emote_name,text,priv_footer)
 	text = text.gsub('/me',emote_name.to_s)
 	text = text.gsub('_','')
 	text = text.gsub(emote_name.to_s,"*#{emote_name.to_s}*")
+	text = mention(text,true)
 	message = {
 		"username" => "­",
 		"icon_url" => $default_icon,
@@ -161,7 +179,7 @@ when ""
 				"pretext" => "If you type `#{command} /me smirks.`, it formats your message as an emote, for example:",
 				"author_name" => "­",
 				"author_icon" => $default_icon,
-				"text" => "_*#{emote_name}* smirks._"
+				"text" => "_*#{$emote_name}* smirks._"
 			},
 			{
 				"mrkdwn_in" => [ "text", "pretext" ],
@@ -237,7 +255,7 @@ when /^\/gm(.*)/
 		exit
 	end
 when /^(\/me .*?) *$/
-	emoter(emote_name,$1.to_s,nil)
+	emoter($emote_name,$1.to_s,nil)
 	exit
 when /^(?:(.*?) *)$/
 	chatter(sl_user,chat_icon,$1.to_s,nil)
