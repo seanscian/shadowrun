@@ -111,12 +111,11 @@ def mention(message,highlight)
 		if /\b#{x[0]}\b/.match(message.to_s)
 			$rpdb.execute("SELECT DISTINCT slack_user FROM characters WHERE charname LIKE \"#{x[0]}%\" AND config IS #{$db_config}").each {
 				|n|
-#				STDERR.puts("notify #{n}")
 				notify_message = {
 					"text" => "#{x[0]} was mentioned by #{$emote_name} in ##{$channel_id}.",
 					"channel" => n[0]
 				}
-				STDERR.puts notify_message
+				STDERR.puts notify_message.to_json
 			}
 			if highlight == true
 				message = message.gsub(x[0],"*#{x[0]}*")
