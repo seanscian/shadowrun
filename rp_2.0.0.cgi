@@ -41,12 +41,12 @@ token = token[0,24]
 	# Also, I’ll open the database once here. It there’s no token, it
 	#    gets closed on exit, otherwise it gets used later, so no wasting
 	#    time on multiple SQLite3::Database.new calls.
-rpdb = SQLite3::Database.new(database)
+$rpdb = SQLite3::Database.new(database)
 
-if rpdb.execute("select token from tokens where token is \"#{token}\"").length == 0
+if $rpdb.execute("select token from tokens where token is \"#{token}\"").length == 0
 	STDERR.puts('You’re not supposed to be here.')
 	exit
-else
+#else
 #	STDERR.puts('PLAYER ONE HAS ENTERED THE GAME!') #
 end
 
@@ -54,29 +54,29 @@ end
 $channel_id = cgi["channel_id"].gsub(/[^0-9A-Za-z]/, '')
 $channel_id = $channel_id[0,9]
 
-user_id = cgi["user_id"].gsub(/[^0-9A-Za-z]/, '')
-user_id = user_id[0,9]
+$user_id = cgi["user_id"].gsub(/[^0-9A-Za-z]/, '')
+$user_id = $user_id[0,9]
 
 text = cgi['text']
 sl_user = cgi['user_name']
 
-db_config = rpdb.execute("select config from channels where channel is \"#{$channel_id}\" limit 1")
+$db_config = $rpdb.execute("select config from channels where channel is \"#{$channel_id}\" limit 1")
 
 case
-when db_config.length == 0
-	db_config = 0
+when $db_config.length == 0
+	$db_config = 0
 else
-	db_config = db_config[0][0]
+	$db_config = $db_config[0][0]
 		# Get the game/character information and GM authorization.
-	game = rpdb.execute("select game from global where config is \"#{db_config}\" limit 1")[0][0]
-	sl_user = rpdb.execute("select charname from characters where config is \"#{db_config}\" and slack_user is \"#{user_id}\" limit 1")[0][0]
-	gm_auth = rpdb.execute("select GM from characters where config is \"#{db_config}\" and slack_user is \"#{cgi['user_id']}\" limit 1")[0][0]
-	$chat_hook = rpdb.execute("select chat_hook from global where config is \"#{db_config}\" limit 1")[0][0]
-	chat_icon = rpdb.execute("select picture from characters where config is #{db_config} and slack_user is \"#{cgi['user_id']}\" limit 1")[0][0]
-	$default_icon = rpdb.execute("select default_icon from global where config is #{db_config}")[0][0]
-	online_icon = rpdb.execute("select icon from online where config is #{db_config}")[0][0]
-	online_name = rpdb.execute("select name from online where config is #{db_config}")[0][0]
-	name_pattern = rpdb.execute("SELECT DISTINCT charname FROM characters WHERE config IS #{db_config} AND slack_user IS NOT \"#{user_id}\" and GM is null")
+	game = $rpdb.execute("select game from global where config is \"#{$db_config}\" limit 1")[0][0]
+	sl_user = $rpdb.execute("select charname from characters where config is \"#{$db_config}\" and slack_user is \"#{$user_id}\" limit 1")[0][0]
+	gm_auth = $rpdb.execute("select GM from characters where config is \"#{$db_config}\" and slack_user is \"#{cgi['user_id']}\" limit 1")[0][0]
+	$chat_hook = $rpdb.execute("select chat_hook from global where config is \"#{$db_config}\" limit 1")[0][0]
+	chat_icon = $rpdb.execute("select picture from characters where config is #{$db_config} and slack_user is \"#{cgi['user_id']}\" limit 1")[0][0]
+	$default_icon = $rpdb.execute("select default_icon from global where config is #{$db_config}")[0][0]
+	online_icon = $rpdb.execute("select icon from online where config is #{$db_config}")[0][0]
+	online_name = $rpdb.execute("select name from online where config is #{$db_config}")[0][0]
+	name_pattern = $rpdb.execute("SELECT DISTINCT charname FROM characters WHERE config IS #{$db_config} AND slack_user IS NOT \"#{$user_id}\" and GM is null")
 end
 
 emote_name = /^(\w+)/.match(sl_user)[1]
@@ -105,7 +105,8 @@ def post_message(url,message)
 end
 
 def mention(message)
-	name_pattern = rpdb.execute("SELECT DISTINCT charname FROM characters WHERE config IS #{db_config} AND slack_user IS NOT \"#{user_id}\" and GM is null")
+	name_pattern = $rpdb.execute("SELECT DISTINCT substr(trim(charname),1,instr(trim(charname)||' ',' ')-1) FROM characters WHERE config IS #{$db_config} AND slack_user IS NOT \"#{$user_id}\" and GM is null")
+	STDERR.puts name_pattern.to_s
 end
 
 def chatter(username,icon_url,text,priv_footer)
@@ -116,6 +117,7 @@ def chatter(username,icon_url,text,priv_footer)
 		"channel" => $channel_id,
 		"attachments" => [ { "footer" => priv_footer } ]
 	}
+	mention(message)
 	post_message($chat_hook,message)
 end
 
@@ -203,13 +205,6 @@ when /^\/gm(.*)/
 						"text" => "Your message.",
 						"author_icon" => $default_icon
 					},
-#					{
-#						"mrkdwn_in" => [ "pretext", "text" ],
-#						"pretext" => "If you provide no character name, the text will post with “%s” as the sender, like this: `%s This is a message.`",
-#						"author_name" => "%s",
-#						"text" => "This is a message.",
-#						"author_icon" => $default_icon
-#					},
 					{
 						"mrkdwn_in" => [ "pretext", "text" ],
 						"pretext" => "Like the non-GM version, `/gm` accepts the `/me` for an emote (and, soon, group communication), e.g. `/rp /gm_Mr._Johnson /me seethes with unbridled hatred.` will display like this:",
