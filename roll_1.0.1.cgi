@@ -185,57 +185,54 @@ when /^\/init +([1-9]{1}[0-9]?)\+([1-5]{1})(?: +(.*?))? *$/
 		message = {
 			"response_type" => "in_channel",
 			"text" => "*#{sl_user}#{comment}#{iter_comment}*",
-			"attachments" =>
-				[
-					{
-						"color" => "#764FA5",
-						"mrkdwn_in" => [ "text" ],
-						"callback_id" => "re_init",
-						"thumb_url" => chat_icon,
-						"fields" =>
-							[
-								{
-									"title" => "Initiative: #{total}",
-									"short" => "true"
-								},
-								{
-									"value" => "Reaction #{$1} + #{roll_string}\n",
-									"short" => "true"
-								}
-							],
-						"actions" =>
-							[
-								{
-									"style" => "primary",
-									"name" => "up_stat",
-									"text" => "+1",
-									"type" => "button",
-									"value" => reinit_state
-								},
-								{
-									"style" => "danger",
-									"name" => "dn_stat",
-									"text" => "−1",
-									"type" => "button",
-									"value" => reinit_state
-								},
-								{
-									"style" => "primary",
-									"name" => "up_init",
-									"text" => "+🎲",
-									"type" => "button",
-									"value" => reinit_state
-								},
-								{
-									"style" => "danger",
-									"name" => "dn_init",
-									"text" => "−🎲",
-									"type" => "button",
-									"value" => reinit_state
-								}
-							]
-					}
-				]
+			"attachments" => [
+				{
+					"color" => "#764FA5",
+					"mrkdwn_in" => [ "text" ],
+					"callback_id" => "re_init",
+					"thumb_url" => chat_icon,
+					"fields" => [
+						{
+							"title" => "Initiative: #{total}",
+							"short" => "true"
+						},
+						{
+							"value" => "Reaction #{$1} + #{roll_string}\n",
+							"short" => "true"
+						}
+					],
+					"actions" => [
+						{
+							"style" => "primary",
+							"name" => "up_stat",
+							"text" => "+1",
+							"type" => "button",
+							"value" => reinit_state
+						},
+						{
+							"style" => "danger",
+							"name" => "dn_stat",
+							"text" => "−1",
+							"type" => "button",
+							"value" => reinit_state
+						},
+						{
+							"style" => "primary",
+							"name" => "up_init",
+							"text" => "+🎲",
+							"type" => "button",
+							"value" => reinit_state
+						},
+						{
+							"style" => "danger",
+							"name" => "dn_init",
+							"text" => "−🎲",
+							"type" => "button",
+							"value" => reinit_state
+						}
+					]
+				}
+			]
 		}
 
 		post_message(cgi["response_url"],message)
@@ -294,7 +291,6 @@ when /^(\d{1,2})?(?:\+(\d))?(?: +\[(\d{1,2})\])?(?: +(\d{1,2}))?(?: +(.*?))? *$/
 
 			# Roll the dice in your pool
 		for roll in 1..pool
-#			STDERR.puts("POOL ROLL: #{roll}") #
 			case rand(6)
 			when 5
 #				STDERR.puts("POOL ROLL #{roll} HIT!") #
@@ -313,7 +309,6 @@ when /^(\d{1,2})?(?:\+(\d))?(?: +\[(\d{1,2})\])?(?: +(\d{1,2}))?(?: +(.*?))? *$/
 
 			# Roll edge dice.
 		for roll in 1..edge
-#			STDERR.puts("EDGE ROLL: #{roll}") #
 			case rand(6)
 			when 5
 #				STDERR.puts("EDGE ROLL #{roll} HIT!") #
@@ -351,13 +346,12 @@ when /^(\d{1,2})?(?:\+(\d))?(?: +\[(\d{1,2})\])?(?: +(\d{1,2}))?(?: +(.*?))? *$/
 				"text" => "Close Call…",
 				"type" => "button",
 				"value" => color,
-				"confirm" =>
-					{
-						"title" => "#{cc_action} Glitch?",
-						"text" => "This will cost you one Edge point.#{reminder}",
-						"ok_text" => "Yes",
-						"dismiss_text" => "No"
-					}
+				"confirm" => {
+					"title" => "#{cc_action} Glitch?",
+					"text" => "This will cost you one Edge point.#{reminder}",
+					"ok_text" => "Yes",
+					"dismiss_text" => "No"
+				}
 			}
 		end
 
@@ -384,13 +378,12 @@ when /^(\d{1,2})?(?:\+(\d))?(?: +\[(\d{1,2})\])?(?: +(\d{1,2}))?(?: +(.*?))? *$/
 			"text" => "Second Chance…",
 			"type" => "button",
 			"value" => "#{user_id} #{$hits.to_i} #{misses.to_i} #{threshold.to_i} #{cgc.to_i} #{limit.to_i}",
-			"confirm" =>
-				{
-					"title" => "Reroll #{misses} Miss#{plural}?",
-					"text" => "This will cost you one Edge point. #{misses} miss#{plural} is #{comparison}average.", # if that helps you make up your mind.
-					"ok_text" => "Yes",
-					"dismiss_text" => "No"
-				}
+			"confirm" => {
+				"title" => "Reroll #{misses} Miss#{plural}?",
+				"text" => "This will cost you one Edge point. #{misses} miss#{plural} is #{comparison}average.", # if that helps you make up your mind.
+				"ok_text" => "Yes",
+				"dismiss_text" => "No"
+			}
 		}
 
 			# Test against Limit
@@ -436,44 +429,40 @@ when /^(\d{1,2})?(?:\+(\d))?(?: +\[(\d{1,2})\])?(?: +(\d{1,2}))?(?: +(.*?))? *$/
 		message = {
 			"response_type" => "in_channel",
 			"text" => "*#{sl_user}#{comment}#{iter_comment}*",
-			"attachments" =>
-				[
-					{
-						"thumb_url" => chat_icon,
-						"color" => color,
-						"fields" =>
-							[
-								{
-									"title" => "#{result}#{critical}#{glitch}",
-									"value" => net_string,
-									"short" => true
-								},
-								{
-									"value" => "Pool: #{pool} Edge: #{edge}#{threshold_string}",
-									"short" => true
-								}
-							],
-						"callback_id" => "edge_effect",
-						"actions" =>
-							[
-#								{
-#									"name" => "extended_test",
-#									"text" => "Extended Test…",
-#									"type" => "button",
-#									"value" => "#{user_id} #{$hits.to_i} #{misses.to_i} #{threshold.to_i} #{cgc.to_i} #{limit.to_i}", # #{interval.to_i}",
-#									"confirm" =>
-#										{
-#											"title" => "Extend Test?",
-#											"text" => "This will repeat your roll and keep track of the hits until you hit the threshold.",
-#											"ok_text" => "OK",
-#											"dismiss_text" => "Cancel"
-#										}
-#								},
-								second_chance,
-								cc_button
-							]
-					}
-				]
+			"attachments" => [
+				{
+					"thumb_url" => chat_icon,
+					"color" => color,
+					"fields" => [
+						{
+							"title" => "#{result}#{critical}#{glitch}",
+							"value" => net_string,
+							"short" => true
+						},
+						{
+							"value" => "Pool: #{pool} Edge: #{edge}#{threshold_string}",
+							"short" => true
+						}
+					],
+					"callback_id" => "edge_effect",
+					"actions" => [
+#						{
+#							"name" => "extended_test",
+#							"text" => "Extended Test…",
+#							"type" => "button",
+#							"value" => "#{user_id} #{$hits.to_i} #{misses.to_i} #{threshold.to_i} #{cgc.to_i} #{limit.to_i}", # #{interval.to_i}",
+#								"confirm" => {
+#									"title" => "Extend Test?",
+#									"text" => "This will repeat your roll and keep track of the hits until you hit the threshold.",
+#									"ok_text" => "OK",
+#									"dismiss_text" => "Cancel"
+#								}
+#						},
+						second_chance,
+						cc_button
+					]
+				}
+			]
 		}
 		post_message(cgi["response_url"],message)
 
@@ -639,28 +628,26 @@ when /^(?:(\d)b)?(?:(\d)s)?(?:(\d)a)?(?:(\d)d)?(?:(\d)p)?(?:(\d)c)?(?:(\d)f)?(?:
 		message = {
 			"response_type" => "in_channel",
 			"text" => "*#{sl_user}#{comment}#{iter_comment}*",
-			"attachments" =>
-				[
-					{
-						"fallback" => "Star Wars dice roll",
-						"color" => color,
-						"fields" =>
-							[
-								{
-									"title" => s_or_f,
-									"value" => a_or_t,
-									"short" => "true"
-								},
-								{
-									"title" => l_or_d,
-									"value" => t_or_d,
-									"short" => "true"
-								}
-							],
-						"footer" => debug,
-						"thumb_url" => chat_icon
-					}
-				]
+			"attachments" => [
+				{
+					"fallback" => "Star Wars dice roll",
+					"color" => color,
+					"fields" => [
+						{
+							"title" => s_or_f,
+							"value" => a_or_t,
+							"short" => "true"
+						},
+						{
+							"title" => l_or_d,
+							"value" => t_or_d,
+							"short" => "true"
+						}
+					],
+					"footer" => debug,
+					"thumb_url" => chat_icon
+				}
+			]
 		}
 
 		post_message(cgi["response_url"],message)
@@ -701,25 +688,23 @@ when /^(\d{1,2})?d(\d{1,2}|100|%)([+-]\d{1,2})?(?: +([^\t ].*?))? *$/
 		message = {
 			"response_type" => "in_channel",
 			"text" => "*#{sl_user}#{comment}#{iter_comment}*",
-			"attachments" =>
-				[
-					{
-						"thumb_url" => chat_icon,
-						"color" => "#0000ff",
-						"fields" =>
-							[
-								{
-									"title" => total,
-									"short" => true
-								},
-								{
-									"value" => "Roll: #{x}d#{y}#{$3.to_s.gsub(/-/,'−')}",
-									"short" => true
-								}
-							],
-						"footer" => sorted.to_s
-					}
-				]
+			"attachments" => [
+				{
+					"thumb_url" => chat_icon,
+					"color" => "#0000ff",
+					"fields" => [
+						{
+							"title" => total,
+							"short" => true
+						},
+						{
+							"value" => "Roll: #{x}d#{y}#{$3.to_s.gsub(/-/,'−')}",
+							"short" => true
+						}
+					],
+					"footer" => sorted.to_s
+				}
+			]
 		}
 
 		post_message(cgi["response_url"],message)

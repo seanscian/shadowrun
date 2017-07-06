@@ -146,38 +146,37 @@ when ""
 	message = {
 		"response_type" => "ephemeral",
 		"text" => help_header,
-		"attachments" =>
-			[
-				{
-					"mrkdwn_in" => [ "text", "pretext" ],
-					"pretext" => "Properly configured for your game, the default operation is to take a message you type (the text can contain Slack markdown) and display it as in-character talking, e.g. `#{command} I have a _*bad*_ feeling about this!` will display like this:",
-					"author_name" => sl_user,
-					"text" => "I have a _*bad*_ feeling about this!",
-					"author_icon" => chat_icon
-				},
-				{
-					"mrkdwn_in" => [ "text", "pretext" ],
-					"pretext" => "If you type `#{command} /me smirks.`, it formats your message as an emote, for example:",
-					"author_name" => "­",
-					"author_icon" => $default_icon,
-					"text" => "_*#{emote_name}* smirks._"
-				},
-				{
-					"mrkdwn_in" => [ "text", "pretext" ],
-					"pretext" => "*In Progress:* The format `#{command} %s We have trouble inbound!` formats your message as a form of group communication (online, telepathic, etc.), like this:",
-					"author_icon" => online_icon.to_s,
-					"author_name" => online_name.to_s,
-					"text" => "formatted text"
-				},
-				{
-					"mrkdwn_in" => [ "text", "pretext" ],
-					"X-pretext" => "*In Progress:* In-character direct messages can be sent to any Slack user when sourced from a game channel by putting `/msg @username` after `#{command}`, for example, `#{command} /msg @username /me waves frantically.` Messages will be delivered in-character directly to the user and cloned to the sender. Replying to messages cannot be done via slackbot; it *must* be done from a configured gaming channel. This is awkward, but functional."
-				},
-				{
-					"mrkdwn_in" => [ "text", "pretext" ],
-					"pretext" => gm_help
-				}
-			]
+		"attachments" => [
+			{
+				"mrkdwn_in" => [ "text", "pretext" ],
+				"pretext" => "Properly configured for your game, the default operation is to take a message you type (the text can contain Slack markdown) and display it as in-character talking, e.g. `#{command} I have a _*bad*_ feeling about this!` will display like this:",
+				"author_name" => sl_user,
+				"text" => "I have a _*bad*_ feeling about this!",
+				"author_icon" => chat_icon
+			},
+			{
+				"mrkdwn_in" => [ "text", "pretext" ],
+				"pretext" => "If you type `#{command} /me smirks.`, it formats your message as an emote, for example:",
+				"author_name" => "­",
+				"author_icon" => $default_icon,
+				"text" => "_*#{emote_name}* smirks._"
+			},
+			{
+				"mrkdwn_in" => [ "text", "pretext" ],
+				"pretext" => "*In Progress:* The format `#{command} %s We have trouble inbound!` formats your message as a form of group communication (online, telepathic, etc.), like this:",
+				"author_icon" => online_icon.to_s,
+				"author_name" => online_name.to_s,
+				"text" => "formatted text"
+			},
+			{
+				"mrkdwn_in" => [ "text", "pretext" ],
+				"X-pretext" => "*In Progress:* In-character direct messages can be sent to any Slack user when sourced from a game channel by putting `/msg @username` after `#{command}`, for example, `#{command} /msg @username /me waves frantically.` Messages will be delivered in-character directly to the user and cloned to the sender. Replying to messages cannot be done via slackbot; it *must* be done from a configured gaming channel. This is awkward, but functional."
+			},
+			{
+				"mrkdwn_in" => [ "text", "pretext" ],
+				"pretext" => gm_help
+			}
+		]
 	}
 
 	post_message(cgi["response_url"],message)
@@ -190,36 +189,35 @@ when /^\/gm(.*)/
 			message = {
 				"response_type" => "ephemeral",
 				"text" => "This allows the GM use an arbitrary name in a message.\n\n`/gm_Character_Name Message text goes here.`\n\nThe `gm_` will be stripped and all underscores in the remaining `Character_Name` will be converted to a whitespace, e.g. `#{command} /gm_Character_Name This is a message.` will display like this:",
-				"attachments" =>
-					[
-						{
-							"mrkdwn_in" => [ "text", "pretext" ],
-							"author_name" => "Character Name",
-							"text" => "This is a message.",
-							"author_icon" => $default_icon
-						},
-						{
-							"mrkdwn_in" => [ "text", "pretext" ],
-							"pretext" => "To display character names with underscores in them, use a character other than an underscore after `/gm`, e.g. `/gm!The!big_SMALL Your message.` will display like this:",
-							"author_name" => "The big_SMALL",
-							"text" => "Your message.",
-							"author_icon" => $default_icon
-						},
-#						{
-#							"mrkdwn_in" => [ "pretext", "text" ],
-#							"pretext" => "If you provide no character name, the text will post with “%s” as the sender, like this: `%s This is a message.`",
-#							"author_name" => "%s",
-#							"text" => "This is a message.",
-#							"author_icon" => $default_icon
-#						},
-						{
-							"mrkdwn_in" => [ "pretext", "text" ],
-							"pretext" => "Like the non-GM version, `/gm` accepts the `/me` for an emote (and, soon, group communication), e.g. `/rp /gm_Mr._Johnson /me seethes with unbridled hatred.` will display like this:",
-							"author_name" => "­",
-							"text" => "_*Mr. Johnson* seethes with unbridled hatred._",
-							"author_icon" => $default_icon
-						}
-					]
+				"attachments" => [
+					{
+						"mrkdwn_in" => [ "text", "pretext" ],
+						"author_name" => "Character Name",
+						"text" => "This is a message.",
+						"author_icon" => $default_icon
+					},
+					{
+						"mrkdwn_in" => [ "text", "pretext" ],
+						"pretext" => "To display character names with underscores in them, use a character other than an underscore after `/gm`, e.g. `/gm!The!big_SMALL Your message.` will display like this:",
+						"author_name" => "The big_SMALL",
+						"text" => "Your message.",
+						"author_icon" => $default_icon
+					},
+#					{
+#						"mrkdwn_in" => [ "pretext", "text" ],
+#						"pretext" => "If you provide no character name, the text will post with “%s” as the sender, like this: `%s This is a message.`",
+#						"author_name" => "%s",
+#						"text" => "This is a message.",
+#						"author_icon" => $default_icon
+#					},
+					{
+						"mrkdwn_in" => [ "pretext", "text" ],
+						"pretext" => "Like the non-GM version, `/gm` accepts the `/me` for an emote (and, soon, group communication), e.g. `/rp /gm_Mr._Johnson /me seethes with unbridled hatred.` will display like this:",
+						"author_name" => "­",
+						"text" => "_*Mr. Johnson* seethes with unbridled hatred._",
+						"author_icon" => $default_icon
+					}
+				]
 			}
 			post_message(cgi["response_url"],message)
 			exit
