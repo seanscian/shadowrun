@@ -373,18 +373,22 @@ when /^(\d{1,2})?(?:\+(\d))?(?: +\[(\d{1,2})\])?(?: +(\d{1,2}))?(?: +(.*?))? *$/
 			#    Then provide a Second Chance!
 		STDERR.puts "E:#{edge} M:#{misses} H:#{$hits} L:#{limit}"
 #		edge == 0 && misses > 0 && second_chance = {
-		edge == 0 && misses > 0 && $hits < limit && second_chance = {
-			"name" => "second_chance",
-			"text" => "Second Chance…",
-			"type" => "button",
-			"value" => "#{user_id} #{$hits.to_i} #{misses.to_i} #{threshold.to_i} #{cgc.to_i} #{limit.to_i}",
-			"confirm" => {
-				"title" => "Reroll #{misses} Miss#{plural}?",
-				"text" => "This will cost you one Edge point. #{misses} miss#{plural} is #{comparison}average.", # if that helps you make up your mind.
-				"ok_text" => "Yes",
-				"dismiss_text" => "No"
+		if edge == 0 and misses > 0 and $hits < limit
+			second_chance = {
+				"name" => "second_chance",
+				"text" => "Second Chance…",
+				"type" => "button",
+				"value" => "#{user_id} #{$hits.to_i} #{misses.to_i} #{threshold.to_i} #{cgc.to_i} #{limit.to_i}",
+				"confirm" => {
+					"title" => "Reroll #{misses} Miss#{plural}?",
+					"text" => "This will cost you one Edge point. #{misses} miss#{plural} is #{comparison}average.", # if that helps you make up your mind.
+					"ok_text" => "Yes",
+					"dismiss_text" => "No"
+				}
 			}
-		}
+		else
+			second_chance = nil
+		end
 
 			# Test against Limit
 		limit > 0 && $hits > limit && $hits = limit
