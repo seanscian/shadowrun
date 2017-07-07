@@ -115,7 +115,7 @@ def mention(message,highlight)
 					"text" => "#{x[0]} was mentioned by #{$emote_name} in ##{$channel_id}.",
 					"channel" => n[0]
 				}
-				STDERR.puts notify_message.to_json
+				post_message($chat_hook,notify_message)
 			}
 			if highlight == true
 				message = message.gsub(x[0],"*#{x[0]}*")
