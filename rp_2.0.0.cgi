@@ -118,7 +118,7 @@ def mention(message,highlight)
 				post_message($chat_hook,notify_message)
 			}
 			if highlight == true
-				message = message.gsub(x[0],"*#{x[0]}*")
+				message.gsub!(x[0],"*#{x[0]}*")
 			end
 		end
 	}
@@ -138,9 +138,9 @@ def chatter(username,icon_url,text,priv_footer)
 end
 
 def emoter(emote_name,text,priv_footer)
-	text = text.gsub('/me',emote_name.to_s)
-	text = text.gsub('_','')
-	text = text.gsub(emote_name.to_s,"*#{emote_name.to_s}*")
+	text.gsub!('/me',emote_name.to_s)
+	text.gsub!('_','')
+	text.gsub!(emote_name.to_s,"*#{emote_name.to_s}*")
 	text = mention(text,true)
 	message = {
 		"username" => "­",
@@ -156,8 +156,26 @@ command = cgi["command"]
 
 if gm_auth.to_s.length > 0
 	gm_help = "As an authorized GM, you have access to the `#{command} /gm` sub-command, allowing a GM to use an arbitrary name in a message. Type `#{command} /gm` for additional help."
+		# find /gm token and parse new name
+	if /(?:\/gm\S.*? +)/.match(text)
+		capture = /(?:\/gm(\S)(.*?) +)/.match(text)
+		sl_user = capture[2].gsub(capture[1],' ')
+		$emote_name = sl_user
+			# I feel safe doing this, because text has to move on without the /gm token.
+		text.gsub!(/(?:\/gm\S.*? +)/,'')
+#		STDERR.puts sl_user #
+#		STDERR.puts text #
+	end
 else
-	gm_help = ''
+	gm_help = nil
+end
+
+	# remove /msg @username and capture the user for private message.
+if /(?:\/msg .*? +)/.match(text)
+	capture = /(?:\/msg (.*?) +)/.match(text)
+	STDERR.puts "This is a private message to #{capture[1]}"
+		# I feel safe doing this, because text has to move on without the /msg tokens.
+	text.gsub!(/(?:\/msg .*? +)/,'')
 end
 
 case text
@@ -232,16 +250,6 @@ when /^\/gm(.*)/
 				]
 			}
 			post_message(cgi["response_url"],message)
-			exit
-		when /^\S.*? +\/me .*? *$/
-			emote_text = /^(\S)(.*?) +(\/me .*?) *$/.match(gm_text.to_s)
-			sl_user = emote_text[2].gsub(emote_text[1],' ')
-			emoter(sl_user,emote_text[3].to_s,nil)
-			exit
-		when /^\S.*? +(?:.*? *)$/
-			chat_text = /^(\S)(.*?) +(?:(.*?) *)$/.match(gm_text.to_s)
-			sl_user = chat_text[2].gsub(chat_text[1],' ')
-			chatter(sl_user,$default_icon,chat_text[3].to_s,nil)
 			exit
 		end
 		exit
