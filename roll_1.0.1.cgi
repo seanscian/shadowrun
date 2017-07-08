@@ -104,7 +104,7 @@ else
 	end
 end
 
-	chat_icon == '' && chat_icon = default_icon
+chat_icon == '' && chat_icon = default_icon
 	# D6 string, for fun (read: Shadowrun).
 SIX_SIDES = "⚀⚁⚂⚃⚄⚅"
 
@@ -127,9 +127,28 @@ def post_message(url,message)
 #	STDERR.puts(response.body) #
 end
 
-
 #help_header = "*`#{cgi["command"]}` in-line help*"
-help_text = "This command accepts several dice roll types:\n\n*1.* Roll a _Shadowrun_ dice pool of the format `p+e`, e.g. `#{cgi["command"]} 5+3`, where 5 is your dice pool and 3 is your Edge dice. You can omit either, but not both, e.g. `#{cgi["command"]} 5` or `#{cgi["command"]} +3`. This type also accepts optional Limit and Threshold, e.g. `#{cgi["command"]} 10+2 3`, `#{cgi["command"]} 10+2 [5] 3`, or `#{cgi["command"]} 10+2 [4]`.\n\nThe color of the sidebar will be green if you rolled any hits, yellow if you didn’t. Red indicates a *Glitch*, while black means *Critical Glitch*. If a Threshold was supplied, green indicates success, yellow indicates failure.\n\n*2.* Roll a _Shadowrun_ initiative roll using the format `r+i`, e.g. `#{cgi["command"]} /init 9+4`, where 9 is your Reaction a 4 is your effective Initiative pool.\n\n*3.* Roll a Star Wars Boost, Setback, Ability, Difficulty, Proficiency, Challenge, and Force roll using the format `#b#s#a#d#p#c#f`. Each element is optional, but the order is strict.  For example, you can roll `2b3a1p` for 2 Boost, 3 Ability, 1 Proficiency, but they *must* be in the order specified.\n\n*4.* Roll the more standard gaming format of `NdX±Y`, e.g. `#{cgi["command"]} 4d6+2`, `3d8-2`, or `d100`. Omitting the number of dice to roll defaults to 1 rolled die. `d100` can be shortened to `d00`, `d0`, or `d%`.\n\nAny of those will accept, after the roll syntax, a comment to help identify the roll’s purpose, e.g. `#{cgi["command"]} 4+2 Bad Guy #1 Dodge`.\n\nIf you use the command `/mroll`, you can specify multiple rolls; typing a number between 1 and 9 after `/mroll`, e.g. `/mroll 3 /init 11+1 Flyspy`, will cause that number of rolls to be made. The number of the roll will be shown, appended to any comment if one was provided.\n\n*HINT:* Tab repeats the last command, and many rolls will accept 0 as a number of dice to roll. For more complex rolls, specify zero dice in the unused fields and a tab-edit makes the roller easier to use. For example: `#{cgi["command"]} 1b0s2a2d1p0c0f`\n\nFinally, you can roll dice privately in your own direct message channel. The results are visible only to you and lets bots interact with the result if they’re configured to."
+help_text = <<HELPTEXT
+This command accepts several dice roll types:
+
+*1.* Roll a _Shadowrun_ dice pool of the format `p+e`, e.g. `#{cgi["command"]} 5+3`, where 5 is your dice pool and 3 is your Edge dice. You can omit either, but not both, e.g. `#{cgi["command"]} 5` or `#{cgi["command"]} +3`. This type also accepts optional Limit and Threshold, e.g. `#{cgi["command"]} 10+2 3`, `#{cgi["command"]} 10+2 [5] 3`, or `#{cgi["command"]} 10+2 [4]`.
+
+The color of the sidebar will be green if you rolled any hits, yellow if you didn’t. Red indicates a *Glitch*, while black means *Critical Glitch*. If a Threshold was supplied, green indicates success, yellow indicates failure.
+
+*2.* Roll a _Shadowrun_ initiative roll using the format `r+i`, e.g. `#{cgi["command"]} /init 9+4`, where 9 is your Reaction a 4 is your effective Initiative pool.
+
+*3.* Roll a Star Wars Boost, Setback, Ability, Difficulty, Proficiency, Challenge, and Force roll using the format `#b#s#a#d#p#c#f`. Each element is optional, but the order is strict.  For example, you can roll `2b3a1p` for 2 Boost, 3 Ability, 1 Proficiency, but they *must* be in the order specified.
+
+*4.* Roll the more standard gaming format of `NdX±Y`, e.g. `#{cgi["command"]} 4d6+2`, `3d8-2`, or `d100`. Omitting the number of dice to roll defaults to 1 rolled die. `d100` can be shortened to `d00`, `d0`, or `d%`.
+
+Any of those will accept, after the roll syntax, a comment to help identify the roll’s purpose, e.g. `#{cgi["command"]} 4+2 Bad Guy #1 Dodge`.
+
+If you use the command `/mroll`, you can specify multiple rolls; typing a number between 1 and 9 after `/mroll`, e.g. `/mroll 3 /init 11+1 Flyspy`, will cause that number of rolls to be made. The number of the roll will be shown, appended to any comment if one was provided.
+
+*HINT:* Tab repeats the last command, and many rolls will accept 0 as a number of dice to roll. For more complex rolls, specify zero dice in the unused fields and a tab-edit makes the roller easier to use. For example: `#{cgi["command"]} 1b0s2a2d1p0c0f`
+
+Finally, you can roll dice privately in your own direct message channel. The results are visible only to you and lets bots interact with the result if they’re configured to.
+HELPTEXT
 
 case text
 when ""
@@ -413,11 +432,11 @@ when /^(\d{1,2})?(?:\+(\d))?(?: +\[(\d{1,2})\])?(?: +(\d{1,2}))?(?: +(.*?))? *$/
 			#    something like that.
 		if threshold > 0 or limit > 0
 			detail = Array.new
-			threshold > 0 && detail[detail.length] = "Threshold: #{threshold}"
 			limit > 0 && limit < 100 && detail[detail.length] = "Limit: #{limit}"
+			threshold > 0 && detail[detail.length] = "Threshold: #{threshold}"
 			threshold_string = "\n#{detail.join(' ')}"
 		else
-			threshold_string = ''
+			threshold_string = nil
 		end
 
 			# If /mroll was called format/number the comment
@@ -455,12 +474,12 @@ when /^(\d{1,2})?(?:\+(\d))?(?: +\[(\d{1,2})\])?(?: +(\d{1,2}))?(?: +(.*?))? *$/
 #							"text" => "Extended Test…",
 #							"type" => "button",
 #							"value" => "#{user_id} #{$hits.to_i} #{misses.to_i} #{threshold.to_i} #{cgc.to_i} #{limit.to_i}", # #{interval.to_i}",
-#								"confirm" => {
-#									"title" => "Extend Test?",
-#									"text" => "This will repeat your roll and keep track of the hits until you hit the threshold.",
-#									"ok_text" => "OK",
-#									"dismiss_text" => "Cancel"
-#								}
+#							"confirm" => {
+#								"title" => "Extend Test?",
+#								"text" => "This will repeat your roll and keep track of the hits until you hit the threshold.",
+#								"ok_text" => "OK",
+#								"dismiss_text" => "Cancel"
+#							}
 #						},
 						second_chance,
 						cc_button
@@ -620,7 +639,7 @@ when /^(?:(\d)b)?(?:(\d)s)?(?:(\d)a)?(?:(\d)d)?(?:(\d)p)?(?:(\d)c)?(?:(\d)f)?(?:
 			# If the roll is Force-only, left-justify
 		if sf_roll == 0
 			s_or_f = l_or_d
-			l_or_d = ''
+			l_or_d = nil
 		end
 
 #		STDERR.puts "COL: #{color}  #{s_or_f}  #{a_or_t}  #{t_or_d}" #
