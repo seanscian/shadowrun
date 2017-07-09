@@ -46,8 +46,6 @@ $rpdb = SQLite3::Database.new(database)
 if $rpdb.execute("select token from tokens where token is \"#{token}\"").length == 0
 	STDERR.puts('You’re not supposed to be here.')
 	exit
-#else
-#	STDERR.puts('PLAYER ONE HAS ENTERED THE GAME!') #
 end
 
 	# Sanitize channel_id, user_id
@@ -69,14 +67,44 @@ else
 	$db_config = $db_config[0][0]
 		# Get the game/character information and GM authorization.
 	game = $rpdb.execute("select game from global where config is \"#{$db_config}\" limit 1")[0][0]
-	sl_user = $rpdb.execute("select charname from characters where config is \"#{$db_config}\" and slack_user is \"#{$user_id}\" limit 1")[0][0]
-	gm_auth = $rpdb.execute("select GM from characters where config is \"#{$db_config}\" and slack_user is \"#{cgi['user_id']}\" limit 1")[0][0]
-	$chat_hook = $rpdb.execute("select chat_hook from global where config is \"#{$db_config}\" limit 1")[0][0]
-	chat_icon = $rpdb.execute("select picture from characters where config is #{$db_config} and slack_user is \"#{cgi['user_id']}\" limit 1")[0][0]
-	$default_icon = $rpdb.execute("select default_icon from global where config is #{$db_config}")[0][0]
-	online_icon = $rpdb.execute("select icon from online where config is #{$db_config}")[0][0]
-	online_name = $rpdb.execute("select name from online where config is #{$db_config}")[0][0]
-	name_pattern = $rpdb.execute("SELECT DISTINCT charname FROM characters WHERE config IS #{$db_config} AND slack_user IS NOT \"#{$user_id}\" and GM is null")
+	begin
+		sl_user = $rpdb.execute("select charname from characters where config is \"#{$db_config}\" and slack_user is \"#{$user_id}\" limit 1")[0][0]
+	rescue
+		sl_user = cgi['user_name']
+#		cgi['channel_name'] != "directmessage" && cgi['channel_name'] != "privategroup" &&
+		STDERR.puts("Unconfigured ID #{cgi['user_id']} (#{cgi['user_name']}) in #{cgi['channel_id']} (#{cgi['channel_name']}).")
+	end
+	begin
+		gm_auth = $rpdb.execute("select GM from characters where config is \"#{$db_config}\" and slack_user is \"#{cgi['user_id']}\" limit 1")[0][0]
+	rescue
+		gm_auth = nil
+	end
+	begin
+		$chat_hook = $rpdb.execute("select chat_hook from global where config is \"#{$db_config}\" limit 1")[0][0]
+	end
+	begin
+		chat_icon = $rpdb.execute("select picture from characters where config is #{$db_config} and slack_user is \"#{cgi['user_id']}\" limit 1")[0][0]
+	rescue
+		chat_icon = nil
+	end
+	begin
+		$default_icon = $rpdb.execute("select default_icon from global where config is #{$db_config}")[0][0]
+	rescue
+		default_icon = nil
+	end
+	begin
+		online_icon = $rpdb.execute("select icon from online where config is #{$db_config}")[0][0]
+	rescue
+		online_icon = nil
+	end
+	begin
+		online_name = $rpdb.execute("select name from online where config is #{$db_config}")[0][0]
+	rescue
+		online_name = nil
+	end
+	begin
+		name_pattern = $rpdb.execute("SELECT DISTINCT charname FROM characters WHERE config IS #{$db_config} AND slack_user IS NOT \"#{$user_id}\" and GM is null")
+	end
 end
 
 $emote_name = /^(\w+)/.match(sl_user)[1]
@@ -153,7 +181,7 @@ def emoter(emote_name,text,priv_footer)
 end
 
 command = cgi["command"]
-
+	# Prep GM help, parse token and remove it from the text.
 if gm_auth.to_s.length > 0
 	gm_help = "As an authorized GM, you have access to the `#{command} /gm` sub-command, allowing a GM to use an arbitrary name in a message. Type `#{command} /gm` for additional help."
 		# find /gm token and parse new name
@@ -167,6 +195,7 @@ if gm_auth.to_s.length > 0
 #		STDERR.puts text #
 	end
 else
+		# I use gm_help as a static entry in the ruby hash later; fewer conditionals this way.
 	gm_help = nil
 end
 
@@ -174,6 +203,7 @@ end
 if /(?:\/msg .*? +)/.match(text)
 	capture = /(?:\/msg (.*?) +)/.match(text)
 	STDERR.puts "This is a private message to #{capture[1]}"
+	STDERR.puts "#{$channel_id}"
 		# I feel safe doing this, because text has to move on without the /msg tokens.
 	text.gsub!(/(?:\/msg .*? +)/,'')
 end
