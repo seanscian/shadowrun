@@ -52,6 +52,9 @@ end
 $channel_id = cgi["channel_id"].gsub(/[^0-9A-Za-z]/, '')
 $channel_id = $channel_id[0,9]
 
+	# Create recipient array, for private messages.
+$chat_targets = [ $channel_id ]
+
 $user_id = cgi["user_id"].gsub(/[^0-9A-Za-z]/, '')
 $user_id = $user_id[0,9]
 
@@ -107,8 +110,10 @@ else
 	end
 end
 
+	# Emote names are just the “first” name.
 $emote_name = /^(\w+)/.match(sl_user)[1]
 
+	# If the chat_icon defaulted or the character doesn’t have one, use the default game icon.
 if chat_icon.to_s == ''
 	chat_icon = $default_icon
 end
@@ -155,14 +160,18 @@ end
 
 def chatter(username,icon_url,text,priv_footer)
 	mention(text,false)
-	message = {
-		"username" => username,
-		"icon_url" => icon_url,
-		"text" => text,
-		"channel" => $channel_id,
-		"attachments" => [ { "footer" => priv_footer } ]
+	$chat_targets.each {
+		|target|
+		message = {
+			"username" => username,
+			"icon_url" => icon_url,
+			"text" => text,
+			"X-channel" => $channel_id,
+			"channel" => target,
+			"attachments" => [ { "footer" => priv_footer } ]
+		}
+		post_message($chat_hook,message)
 	}
-	post_message($chat_hook,message)
 end
 
 def emoter(emote_name,text,priv_footer)
@@ -170,14 +179,17 @@ def emoter(emote_name,text,priv_footer)
 	text.gsub!('_','')
 	text.gsub!(emote_name.to_s,"*#{emote_name.to_s}*")
 	text = mention(text,true)
-	message = {
-		"username" => "­",
-		"icon_url" => $default_icon,
-		"text" => "_#{text}_",
-		"channel" => $channel_id,
-		"attachments" => [ { "footer" => priv_footer } ]
+	$chat_targets.each {
+		|target|
+		message = {
+			"username" => "­",
+			"icon_url" => $default_icon,
+			"text" => "_#{text}_",
+			"channel" => target,
+			"attachments" => [ { "footer" => priv_footer } ]
+		}
+		post_message($chat_hook,message)
 	}
-	post_message($chat_hook,message)
 end
 
 command = cgi["command"]
@@ -191,8 +203,6 @@ if gm_auth.to_s.length > 0
 		$emote_name = sl_user
 			# I feel safe doing this, because text has to move on without the /gm token.
 		text.gsub!(/(?:\/gm\S.*? +)/,'')
-#		STDERR.puts sl_user #
-#		STDERR.puts text #
 	end
 else
 		# I use gm_help as a static entry in the ruby hash later; fewer conditionals this way.
@@ -202,10 +212,13 @@ end
 	# remove /msg @username and capture the user for private message.
 if /(?:\/msg .*? +)/.match(text)
 	capture = /(?:\/msg (.*?) +)/.match(text)
-	STDERR.puts "This is a private message to #{capture[1]}"
-	STDERR.puts "#{$channel_id}"
+	$chat_targets = [ $user_id, capture[1] ]
+	priv_footer = "from <##{$channel_id}|#{cgi['channel_name']}> player <@#{$user_id}|#{cgi['user_name']}> to #{capture[1]}"
 		# I feel safe doing this, because text has to move on without the /msg tokens.
 	text.gsub!(/(?:\/msg .*? +)/,'')
+else
+		# priv_footer is called by chatter and emote, so let’s make sure it always exists.
+	priv_footer = nil
 end
 
 case text
@@ -237,7 +250,7 @@ when ""
 			},
 			{
 				"mrkdwn_in" => [ "text", "pretext" ],
-				"X-pretext" => "*In Progress:* In-character direct messages can be sent to any Slack user when sourced from a game channel by putting `/msg @username` after `#{command}`, for example, `#{command} /msg @username /me waves frantically.` Messages will be delivered in-character directly to the user and cloned to the sender. Replying to messages cannot be done via slackbot; it *must* be done from a configured gaming channel. This is awkward, but functional."
+				"pretext" => "In-character direct messages can be sent to any Slack user when sourced from a game channel by putting `/msg @username` after `#{command}`, for example, `#{command} /msg @username /me waves frantically.` Messages will be delivered in-character directly to the user and cloned to the sender. Replying to messages cannot be done via slackbot; it *must* be done from a configured gaming channel. This is awkward, but functional."
 			},
 			{
 				"mrkdwn_in" => [ "text", "pretext" ],
@@ -292,9 +305,9 @@ when /^\/gm(.*)/
 		exit
 	end
 when /^(\/me .*?) *$/
-	emoter($emote_name,$1.to_s,nil)
+	emoter($emote_name,$1.to_s,priv_footer)
 	exit
 when /^(?:(.*?) *)$/
-	chatter(sl_user,chat_icon,$1.to_s,nil)
+	chatter(sl_user,chat_icon,$1.to_s,priv_footer)
 	exit
 end
