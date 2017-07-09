@@ -195,7 +195,7 @@ end
 command = cgi["command"]
 	# Prep GM help, parse token and remove it from the text.
 if gm_auth.to_s.length > 0
-	gm_help = "As an authorized GM, you have access to the `#{command} /gm` sub-command, allowing a GM to use an arbitrary name in a message. Type `#{command} /gm` for additional help."
+	gm_help = "\n\nAs an authorized GM, you have access to the `#{command} /gm` sub-command, allowing a GM to use an arbitrary name in a message. Type `#{command} /gm` for additional help."
 		# find /gm token and parse new name
 	if /(?:\/gm\S.*? +)/.match(text)
 		capture = /(?:\/gm(\S)(.*?) +)/.match(text)
@@ -206,7 +206,7 @@ if gm_auth.to_s.length > 0
 	end
 else
 		# I use gm_help as a static entry in the ruby hash later; fewer conditionals this way.
-	gm_help = nil
+	gm_help = ''
 end
 
 	# remove /msg @username and capture the user for private message.
@@ -250,11 +250,7 @@ when ""
 			},
 			{
 				"mrkdwn_in" => [ "text", "pretext" ],
-				"pretext" => "In-character direct messages can be sent to any Slack user when sourced from a game channel by putting `/msg @username` after `#{command}`, for example, `#{command} /msg @username /me waves frantically.` Messages will be delivered in-character directly to the user and cloned to the sender. Replying to messages cannot be done via slackbot; it *must* be done from a configured gaming channel. This is awkward, but functional."
-			},
-			{
-				"mrkdwn_in" => [ "text", "pretext" ],
-				"pretext" => gm_help
+				"pretext" => "In-character direct messages can be sent to any Slack user when sourced from a game channel by putting `/msg @username` after `#{command}`, for example, `#{command} /msg @username /me waves frantically.` Messages will be delivered in-character directly to the user and cloned to the sender. Replying to messages cannot be done via slackbot; it *must* be done from a configured gaming channel. This is awkward, but functional.#{gm_help}"
 			}
 		]
 	}
