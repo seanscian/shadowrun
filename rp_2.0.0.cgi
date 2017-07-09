@@ -29,10 +29,8 @@ database = 'rpdb'
 	# Sanitize the input token, though the database *file* permissions are read-
 	# only, so there shouldn’t be anything that can damage the database, but
 	# I would like to avoid anything like shell scriping or other injections.
-#STDERR.puts("Received: #{cgi["token"]}") #
 token = cgi["token"].gsub(/[^0-9A-Za-z]/, '')
 token = token[0,24]
-#STDERR.puts("Current: #{token}") #
 
 	# Use SQLite to see if the token we receive is in the database.
 	#    Does anyone have a better idea than this? I don’t care about the
@@ -193,29 +191,39 @@ def emoter(emote_name,text,priv_footer)
 end
 
 command = cgi["command"]
-	# Prep GM help, parse token and remove it from the text.
-if gm_auth.to_s.length > 0
-	gm_help = "\n\nAs an authorized GM, you have access to the `#{command} /gm` sub-command, allowing a GM to use an arbitrary name in a message. Type `#{command} /gm` for additional help."
-		# find /gm token and parse new name
-	if /(?:\/gm\S.*? +)/.match(text)
-		capture = /(?:\/gm(\S)(.*?) +)/.match(text)
+
+	# I use gm_help as a static entry in the ruby hash later; fewer conditionals this way.
+gm_help = ''
+
+	# Parse GM token and remove it from the text.
+if /(?:\/gm\S\w+\b)/.match(text)
+		# If the user is a GM, give substantive help and change actor name…
+	if gm_auth.to_s.length > 0
+		gm_help = "\n\nAs an authorized GM, you have access to the `#{command} /gm` sub-command, allowing a GM to use an arbitrary name in a message. Type `#{command} /gm` for additional help."
+			# find /gm token and parse new name
+		capture = /(?:\/gm(\S)(\w+)\b)/.match(text)
 		sl_user = capture[2].gsub(capture[1],' ')
 		$emote_name = sl_user
-			# I feel safe doing this, because text has to move on without the /gm token.
-		text.gsub!(/(?:\/gm\S.*? +)/,'')
+	else
+			# …otherwise tell the person they’re not a GM…
+		message = {
+			"response_type" => "ephemeral",
+			"text" => "You are not a GM on this channel."
+		}
+		post_message(cgi["response_url"],message)
+		exit
 	end
-else
-		# I use gm_help as a static entry in the ruby hash later; fewer conditionals this way.
-	gm_help = ''
+		# …and in either case, move the text along without the /gm token.
+	text.gsub!(/(?:\/gm\S\w+\b) */,'')
 end
 
 	# remove /msg @username and capture the user for private message.
-if /(?:\/msg .*? +)/.match(text)
-	capture = /(?:\/msg (.*?) +)/.match(text)
+if /(?:\/msg +@\w+\b)/.match(text)
+	capture = /(?:\/msg +(@\w+)\b)/.match(text)
 	$chat_targets = [ $user_id, capture[1] ]
 	priv_footer = "from <##{$channel_id}|#{cgi['channel_name']}> player <@#{$user_id}|#{cgi['user_name']}> to #{capture[1]}"
 		# I feel safe doing this, because text has to move on without the /msg tokens.
-	text.gsub!(/(?:\/msg .*? +)/,'')
+	text.gsub!(/(?:\/msg +(@\w+)\b) */,'')
 else
 		# priv_footer is called by chatter and emote, so let’s make sure it always exists.
 	priv_footer = nil
