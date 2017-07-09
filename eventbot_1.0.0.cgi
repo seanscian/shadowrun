@@ -97,5 +97,3 @@ else
 		end
 	end
 end
-
-exit
