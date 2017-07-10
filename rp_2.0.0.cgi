@@ -207,7 +207,7 @@ def matrixer(username,sl_user,text,priv_footer)
 		message = {
 			"username" => username,
 			"icon_url" => $default_icon,
-			"text" => "#{matrix_text}",
+			"text" => matrix_text,
 			"channel" => target,
 			"attachments" => [ { "footer" => priv_footer } ]
 		}
