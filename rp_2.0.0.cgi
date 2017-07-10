@@ -124,6 +124,18 @@ else
 	begin
 		name_pattern = $rpdb.execute("SELECT DISTINCT charname FROM characters WHERE config IS #{$db_config} AND slack_user IS NOT \"#{$user_id}\" and GM is null")
 	end
+	begin
+		alternates = $rpdb.execute("SELECT dest FROM chat_targets WHERE config IS #{$db_config} AND source IS \"#{$channel_id}\"")
+	rescue
+		alternates = nil
+	end
+end
+
+if alternates.length > 0
+		# The way the SQL query returns the array, I can only think of this
+		# method to redefine the single-level $chat_targets array.
+	$chat_targets = Array.new
+	alternates.each { |chan| $chat_targets[$chat_targets.length] = chan[0] }
 end
 
 	# Emote names are just the “first” name.
@@ -297,10 +309,10 @@ when ""
 			},
 			{
 				"mrkdwn_in" => [ "text", "pretext" ],
-				"pretext" => "*In Progress:* The format `#{command} #{$online_command} We have trouble inbound!` formats your message as a form of group communication (online, telepathic, etc.), like this:",
+				"pretext" => "The format `#{command} #{$online_command} We have trouble inbound!` formats your message as a form of group communication (online, telepathic, etc.), like this:",
 				"author_icon" => online_icon.to_s,
 				"author_name" => online_name.to_s,
-				"text" => "formatted text"
+				"text" => matrix_formatter(sl_user,"We have trouble inbound!")
 			},
 			{
 				"mrkdwn_in" => [ "text", "pretext" ],
@@ -359,7 +371,6 @@ when /^(\/me .*?) *$/
 	exit
 when $online_pattern
 	matrixer(online_name,sl_user,$1.to_s,priv_footer)
-	STDERR.puts("GROUP CHAT: '#{$1}'")
 	exit
 when /^(?:(.*?) *)$/
 	chatter(sl_user,chat_icon,$1.to_s,priv_footer)
