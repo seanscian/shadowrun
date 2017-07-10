@@ -191,7 +191,7 @@ end
 
 def matrix_formatter(user,text)
 	if $online_prog.to_s == ""
-		return "\`#{$prefix}#{text.gsub('`','')}#{$suffix}#{$emote_name}\`"
+		return "\`#{$prefix}#{text.gsub('`','')}#{$suffix}#{$emote_name}\ \<#{Time.new.to_i}\>`"
 	else
 		output = `online_progs/#{$online_prog} #{$user_id} #{Base64.strict_encode64(user)} #{Base64.strict_encode64(text)}`
 		output.force_encoding(Encoding::UTF_8)
