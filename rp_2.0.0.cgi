@@ -4,6 +4,7 @@ require 'json'
 require 'net/http'
 require 'uri'
 require 'sqlite3'
+require 'base64'
 
 	# Conventions:
 	# Comments are tabbed one extra level in.
@@ -94,9 +95,26 @@ else
 		default_icon = nil
 	end
 	begin
+		$online_prog = $rpdb.execute("SELECT program FROM online WHERE config IS #{$db_config} LIMIT 1")[0][0]
+	rescue
+		$online_prog = nil
+	end
+	begin
+		$prefix = $rpdb.execute("SELECT prefix FROM online WHERE config IS #{$db_config} LIMIT 1")[0][0]
+		$suffix = $rpdb.execute("SELECT suffix FROM online WHERE config IS #{$db_config} LIMIT 1")[0][0]
+	rescue
+		$prefix = '['
+		$suffix = ']'
+	end
+	begin
 		online_icon = $rpdb.execute("select icon from online where config is #{$db_config}")[0][0]
 	rescue
 		online_icon = nil
+	end
+	begin
+		$online_command = $rpdb.execute("SELECT command FROM online WHERE config IS #{$db_config} LIMIT 1")[0][0]
+	rescue
+		$online_command = '/com'
 	end
 	begin
 		online_name = $rpdb.execute("select name from online where config is #{$db_config}")[0][0]
@@ -110,6 +128,9 @@ end
 
 	# Emote names are just the “first” name.
 $emote_name = /^(\w+)/.match(sl_user)[1]
+
+	# The pattern to look for “online” or “group” chat…
+$online_pattern = Regexp.new("^(?:#{$online_command.to_s} +(.*?) *)$")
 
 	# If the chat_icon defaulted or the character doesn’t have one, use the default game icon.
 if chat_icon.to_s == ''
@@ -156,6 +177,32 @@ def mention(message,highlight)
 	return message
 end
 
+def matrix_formatter(user,text)
+	if $online_prog.to_s == ""
+		return "\`#{$prefix}#{text.gsub('`','')}#{$suffix}#{$emote_name}\`"
+	else
+		output = `online_progs/#{$online_prog} #{$user_id} #{Base64.strict_encode64(user)} #{Base64.strict_encode64(text)}`
+		output.force_encoding(Encoding::UTF_8)
+		return output
+	end
+end
+
+def matrixer(username,sl_user,text,priv_footer)
+	mention(text,false)
+	matrix_text = matrix_formatter(sl_user,text)
+	$chat_targets.each {
+		|target|
+		message = {
+			"username" => username,
+			"icon_url" => $default_icon,
+			"text" => "#{matrix_text}",
+			"channel" => target,
+			"attachments" => [ { "footer" => priv_footer } ]
+		}
+		post_message($chat_hook,message)
+	}
+end
+
 def chatter(username,icon_url,text,priv_footer)
 	mention(text,false)
 	$chat_targets.each {
@@ -164,7 +211,6 @@ def chatter(username,icon_url,text,priv_footer)
 			"username" => username,
 			"icon_url" => icon_url,
 			"text" => text,
-			"X-channel" => $channel_id,
 			"channel" => target,
 			"attachments" => [ { "footer" => priv_footer } ]
 		}
@@ -251,7 +297,7 @@ when ""
 			},
 			{
 				"mrkdwn_in" => [ "text", "pretext" ],
-				"pretext" => "*In Progress:* The format `#{command} %s We have trouble inbound!` formats your message as a form of group communication (online, telepathic, etc.), like this:",
+				"pretext" => "*In Progress:* The format `#{command} #{$online_command} We have trouble inbound!` formats your message as a form of group communication (online, telepathic, etc.), like this:",
 				"author_icon" => online_icon.to_s,
 				"author_name" => online_name.to_s,
 				"text" => "formatted text"
@@ -310,6 +356,10 @@ when /^\/gm(.*)/
 	end
 when /^(\/me .*?) *$/
 	emoter($emote_name,$1.to_s,priv_footer)
+	exit
+when $online_pattern
+	matrixer(online_name,sl_user,$1.to_s,priv_footer)
+	STDERR.puts("GROUP CHAT: '#{$1}'")
 	exit
 when /^(?:(.*?) *)$/
 	chatter(sl_user,chat_icon,$1.to_s,priv_footer)

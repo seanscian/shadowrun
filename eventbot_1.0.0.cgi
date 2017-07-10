@@ -60,7 +60,8 @@ else
 #		STDERR.puts "Acting on the message left at #{slack_event["event"]["ts"]}." #
 #		slack_event["event"].each { |key,value| STDERR.puts "#{key} => #{value}" } #
 			# TODO: Move this to a subroutine.
-		uri = URI.parse("http://127.0.0.1/rp_1.2.2.cgi")
+#		uri = URI.parse("http://127.0.0.1/rp_1.2.2.cgi")
+		uri = URI.parse("http://127.0.0.1/rp_2.0.0.cgi")
 		http = Net::HTTP.new(uri.host, uri.port)
 		request = Net::HTTP::Post.new(
 			uri.request_uri,
