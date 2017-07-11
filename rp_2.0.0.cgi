@@ -51,9 +51,6 @@ end
 $channel_id = cgi["channel_id"].gsub(/[^0-9A-Za-z]/, '')
 $channel_id = $channel_id[0,9]
 
-	# Create recipient array, for private messages.
-$chat_targets = [ $channel_id ]
-
 $user_id = cgi["user_id"].gsub(/[^0-9A-Za-z]/, '')
 $user_id = $user_id[0,9]
 
@@ -136,6 +133,9 @@ if alternates.length > 0
 		# method to redefine the single-level $chat_targets array.
 	$chat_targets = Array.new
 	alternates.each { |chan| $chat_targets[$chat_targets.length] = chan[0] }
+else
+		# Create recipient array, for private messages.
+	$chat_targets = [ $channel_id ]
 end
 
 	# Emote names are just the “first” name.
