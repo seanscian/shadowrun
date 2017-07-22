@@ -145,7 +145,7 @@ Any of those will accept, after the roll syntax, a comment to help identify the 
 
 If you use the command `/mroll`, you can specify multiple rolls; typing a number between 1 and 9 after `/mroll`, e.g. `/mroll 3 /init 11+1 Flyspy`, will cause that number of rolls to be made. The number of the roll will be shown, appended to any comment if one was provided.
 
-*HINT:* Tab repeats the last command, and many rolls will accept 0 as a number of dice to roll. For more complex rolls, specify zero dice in the unused fields and a tab-edit makes the roller easier to use. For example: `#{cgi["command"]} 1b0s2a2d1p0c0f`
+*IMPORTANT:* Tab no longer repeats the last command in Slack, so the old trick of using a zero dice in the unused fields isn’t as useful anymore. Consider copy/pasting something to the private chat Slack gives you with yourself, e.g. `#{cgi["command"]} 1b0s2a2d1p0c0f`, so you can revisit that for formatting. Of course, you can always just invoke this help and copy paste it from here.
 
 Finally, you can roll dice privately in your own direct message channel. The results are visible only to you and lets bots interact with the result if they’re configured to.
 HELPTEXT
