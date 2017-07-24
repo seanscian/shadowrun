@@ -391,7 +391,6 @@ when /^(\d{1,2})?(?:\+(\d))?(?: +\[(\d{1,2})\])?(?: +(\d{1,2}))?(?: +(.*?))? *$/
 			#    and if the limit was not reached…
 			#    Then provide a Second Chance!
 		STDERR.puts "E:#{edge} M:#{misses} H:#{$hits} L:#{limit}"
-#		edge == 0 && misses > 0 && second_chance = {
 		if edge == 0 and misses > 0 and $hits < limit
 			second_chance = {
 				"name" => "second_chance",
