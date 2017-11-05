@@ -46,7 +46,7 @@ rpdb = SQLite3::Database.new(database)
 if rpdb.execute("select token from tokens where token is \"#{token}\"").length == 0
 	STDERR.puts('You’re not supposed to be here.')
 	exit
-else
+#else
 #	STDERR.puts('PLAYER ONE HAS ENTERED THE GAME!')
 end
 
