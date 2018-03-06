@@ -135,7 +135,7 @@ This command accepts several dice roll types:
 
 The color of the sidebar will be green if you rolled any hits, yellow if you didn’t. Red indicates a *Glitch*, while black means *Critical Glitch*. If a Threshold was supplied, green indicates success, yellow indicates failure.
 
-*2.* Roll a _Shadowrun_ initiative roll using the format `r+i`, e.g. `#{cgi["command"]} /init 9+4`, where 9 is your Reaction a 4 is your effective Initiative pool.
+*2.* Roll a _Shadowrun_ initiative roll using the format `r+i`, e.g. `#{cgi["command"]} /init 9+4`, where 9 is your Reaction a 4 is your effective Initiative pool. If you omit the +#, e.g. `#{cgi["command"]} /init 9`, the roller assumes a single initiative die.
 
 *3.* Roll a Star Wars Boost, Setback, Ability, Difficulty, Proficiency, Challenge, and Force roll using the format `#b#s#a#d#p#c#f`. Each element is optional, but the order is strict.  For example, you can roll `2b3a1p` for 2 Boost, 3 Ability, 1 Proficiency, but they *must* be in the order specified.
 
