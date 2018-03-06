@@ -159,11 +159,29 @@ when ""
 	}
 
 	post_message(cgi["response_url"],message)
-when /^\/init +([1-9]{1}[0-9]?)\+([1-5]{1})(?: +(.*?))? *$/
+#when /^\/init +([1-9]{1}[0-9]?)\+([1-5]{1})(?: +(.*?))? *$/
+when /^\/init +([1-9]{1}[0-9]?)(?:\+([1-5]{1}))?(?: +(.*?))? *$/
 #	STDERR.puts("found init: #{text}") #
 #	STDERR.puts("Reaction: ", $1) #
 #	STDERR.puts("Initiative Dice: ", $2) #
 #	STDERR.puts("Comment: ", $3) #
+	case $1.to_i
+	when 0
+		reaction = 5
+#		STDERR.puts("No Reaction, setting to 5.") #
+	else
+		reaction = $1.to_i
+	end
+#		STDERR.puts("Reaction: #{reaction}") #
+
+	case $2.to_i
+	when 0
+		initiative_dice = 1
+#		STDERR.puts("No dice, setting to 1.") #
+	else
+		initiative_dice = $2.to_i
+	end
+#		STDERR.puts("Initiative Dice: #{initiative_dice}") #
 
 		# Delimit comment, if present.
 	case $3.to_s
@@ -181,9 +199,10 @@ when /^\/init +([1-9]{1}[0-9]?)\+([1-5]{1})(?: +(.*?))? *$/
 
 			# Also the die string is zero-indexed, so that’s one less math
 			# operation for that string as well.
-		total = $1.to_i + $2.to_i
+#		total = $1.to_i + $2.to_i
+		total = reaction + initiative_dice
 		roll_string = ''
-		for i in 1..$2.to_i
+		for i in 1..initiative_dice
 			dieroll = rand(6)
 #			STDERR.puts("Rolled: ", SIX_SIDES[dieroll,1]) #
 			roll_string = "#{roll_string}#{SIX_SIDES[dieroll,1]} "
@@ -216,7 +235,7 @@ when /^\/init +([1-9]{1}[0-9]?)\+([1-5]{1})(?: +(.*?))? *$/
 							"short" => "true"
 						},
 						{
-							"value" => "Reaction #{$1} + #{roll_string}\n",
+							"value" => "Reaction #{reaction} + #{roll_string}\n",
 							"short" => "true"
 						}
 					],
