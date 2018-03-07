@@ -159,20 +159,11 @@ when ""
 	}
 
 	post_message(cgi["response_url"],message)
-#when /^\/init +([1-9]{1}[0-9]?)\+([1-5]{1})(?: +(.*?))? *$/
 when /^\/init +([1-9]{1}[0-9]?)(?:\+([1-5]{1}))?(?: +(.*?))? *$/
 #	STDERR.puts("found init: #{text}") #
 #	STDERR.puts("Reaction: ", $1) #
 #	STDERR.puts("Initiative Dice: ", $2) #
 #	STDERR.puts("Comment: ", $3) #
-	case $1.to_i
-	when 0
-		reaction = 5
-#		STDERR.puts("No Reaction, setting to 5.") #
-	else
-		reaction = $1.to_i
-	end
-#		STDERR.puts("Reaction: #{reaction}") #
 
 	case $2.to_i
 	when 0
@@ -200,7 +191,7 @@ when /^\/init +([1-9]{1}[0-9]?)(?:\+([1-5]{1}))?(?: +(.*?))? *$/
 			# Also the die string is zero-indexed, so that’s one less math
 			# operation for that string as well.
 #		total = $1.to_i + $2.to_i
-		total = reaction + initiative_dice
+		total = $1.to_i + initiative_dice
 		roll_string = ''
 		for i in 1..initiative_dice
 			dieroll = rand(6)
@@ -235,7 +226,7 @@ when /^\/init +([1-9]{1}[0-9]?)(?:\+([1-5]{1}))?(?: +(.*?))? *$/
 							"short" => "true"
 						},
 						{
-							"value" => "Reaction #{reaction} + #{roll_string}\n",
+							"value" => "Reaction #{$1.to_i} + #{roll_string}\n",
 							"short" => "true"
 						}
 					],
@@ -487,18 +478,6 @@ when /^(\d{1,2})?(?:\+(\d))?(?: +\[(\d{1,2})\])?(?: +(\d{1,2}))?(?: +(.*?))? *$/
 					],
 					"callback_id" => "edge_effect",
 					"actions" => [
-#						{
-#							"name" => "extended_test",
-#							"text" => "Extended Test…",
-#							"type" => "button",
-#							"value" => "#{user_id} #{$hits.to_i} #{misses.to_i} #{threshold.to_i} #{cgc.to_i} #{limit.to_i}", # #{interval.to_i}",
-#							"confirm" => {
-#								"title" => "Extend Test?",
-#								"text" => "This will repeat your roll and keep track of the hits until you hit the threshold.",
-#								"ok_text" => "OK",
-#								"dismiss_text" => "Cancel"
-#							}
-#						},
 						second_chance,
 						cc_button
 					]
