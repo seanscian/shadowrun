@@ -399,6 +399,8 @@ when /^(\d{1,2})?(?:\+(\d))?(?: +\[(\d{1,2})\])?(?: +(\d{1,2}))?(?: +(.*?))? *$/
 
 			# Misses are needed for reroller dialogue box
 		misses = pool + edge - $hits
+		second_chance_average = misses / 3
+		likely_total = $hits + second_chance_average
 		misses != 1 && plural = 'es'
 		case
 		when ( misses * 3 / 2 ) > pool
@@ -416,9 +418,9 @@ when /^(\d{1,2})?(?:\+(\d))?(?: +\[(\d{1,2})\])?(?: +(\d{1,2}))?(?: +(.*?))? *$/
 			case
 			when misses < one_ninth
 				adverb = 'insanely '
-			when misses >= one_ninth && misses <= one_ninth*2
+			when misses >= one_ninth && misses <= one_ninth * 2
 				adverb = 'well '
-			when misses > one_ninth*4
+			when misses > one_ninth * 4
 				adverb = 'slightly '
 			end
 		else
@@ -439,7 +441,7 @@ when /^(\d{1,2})?(?:\+(\d))?(?: +\[(\d{1,2})\])?(?: +(\d{1,2}))?(?: +(.*?))? *$/
 				"value" => "#{user_id} #{$hits.to_i} #{misses.to_i} #{threshold.to_i} #{cgc.to_i} #{limit.to_i}",
 				"confirm" => {
 					"title" => "Reroll #{misses} Miss#{plural}?",
-					"text" => "This will cost you one Edge point. #{misses} miss#{plural} is #{adverb}#{comparison}average.", # if that helps you make up your mind.
+					"text" => "This will cost you one Edge point. #{misses} miss#{plural} is #{adverb}#{comparison}average. The number of likely additional hits by this Second Chance is #{second_chance_average} for a new hit total of #{likely_total}.", # if that helps you make up your mind.
 					"ok_text" => "Yes",
 					"dismiss_text" => "No"
 				}
