@@ -135,6 +135,10 @@ This command accepts several dice roll types:
 
 The color of the sidebar will be green if you rolled any hits, yellow if you didn’t. Red indicates a *Glitch*, while black means *Critical Glitch*. If a Threshold was supplied, green indicates success, yellow indicates failure.
 
+Magicians can, after their roll command, specify the dice to resist drain with the `/drain` token, e.g. `#{cgi["command"]} 18 [8] Clout /drain 13`. This example would perform the roll of 18 pool dice, limit 8, with the comment “Clout”. It would be followed immediately by a roll of 13 dice with the comment “Resist drain for Clout.”
+
+Technomancers can do the same thing, using the `/fading` token. (Technically, magicians can use the `/fading` token and technomancers can use the `/drain` token. It’s the same code.)
+
 *2.* Roll a _Shadowrun_ initiative roll using the format `r+i`, e.g. `#{cgi["command"]} /init 9+4`, where 9 is your Reaction a 4 is your effective Initiative pool. If you omit the +#, e.g. `#{cgi["command"]} /init 9`, the roller assumes a single initiative die.
 
 *3.* Roll a Star Wars Boost, Setback, Ability, Difficulty, Proficiency, Challenge, and Force roll using the format `#b#s#a#d#p#c#f`. Each element is optional, but the order is strict.  For example, you can roll `2b3a1p` for 2 Boost, 3 Ability, 1 Proficiency, but they *must* be in the order specified.
@@ -273,13 +277,15 @@ when /^\/init +([1-9]{1}[0-9]?)(?:\+([1-5]{1}))?(?: +(.*?))? *$/
 	#    Threshold: 1-2 digits, optional, capture group 4
 	#    Remainder is a comment, capture group 5…
 	#    Unless the /drain or /fading key is used, which is the drain/fading resist pool, capture group 6.
-when /^(\d{1,2})?(?:\+(\d))?(?: +\[(\d{1,2})\])?(?: +(\d{1,2}))?(?: +(.*?) *(?:\/(?i:drain|fading) *(\d{1,2}))?)? *$/
+when /^(\d{1,2})?(?:\+(\d))?(?: +\[(\d{1,2})\])?(?: +(\d{1,2}))?(?: +(.*?) *(?i:\/(drain|fading) *(\d{1,2}))?)? *$/
 	pool = $1.to_i
 	edge = $2.to_i
-	edge == 0 && limit = $3.to_i or limit = 100 # Rolled Edge? No Limits
-	limit == 0 && limit = 100
+	edge == 0 && limit = $3.to_i or limit = 100 # Rolled Edge? No Limit
+	limit == 0 && limit = 100 # Set a limit of 0? No Limit
 	threshold = $4.to_i
-	drain_pool = $6.to_i
+	drain_fade = $6.to_s
+	drain_pool = $7.to_i
+	cap_comment = $5.to_s
 
 	case $5.to_s
 	when ''
@@ -529,9 +535,25 @@ when /^(\d{1,2})?(?:\+(\d))?(?: +\[(\d{1,2})\])?(?: +(\d{1,2}))?(?: +(.*?) *(?:\
 #		STDERR.puts("Hits: #{$hits} Ones: #{ones} Misses: #{misses} #{threshold_string}, #{net_string}") #
 	end
 
-#	if drain_pool > 0
+	if drain_pool > 0
 #		STDERR.puts("This is where I’d roll the pool of #{drain_pool} dice with the comment \"#{comment} - Resist Drain\"") #
-#	end
+			# Just talk to yourself and roll again.
+		uri = URI.parse("http://127.0.0.1/roll_1.0.3.cgi")
+		http = Net::HTTP.new(uri.host, uri.port)
+		request = Net::HTTP::Post.new(
+			uri.request_uri,
+			'Content-Type' => 'application/x-www-form-urlencoded',
+			'Host' => 'shadowrun.seanscian.net'
+		)
+
+		request.body = "token=#{token}&channel_id=#{channel_id}&user_id=#{user_id}&command=#{cgi["command"].gsub(/mroll/,'roll')}&text=#{drain_pool} Resist #{drain_fade} for #{cap_comment}#{iter_comment}&response_url=#{cgi["response_url"]}"
+
+		STDERR.puts(request.body) #
+
+		response = http.request(request)
+		STDERR.puts(response.body) #
+
+	end
 when /^(?:(\d)b)?(?:(\d)s)?(?:(\d)a)?(?:(\d)d)?(?:(\d)p)?(?:(\d)c)?(?:(\d)f)?(?: +(.*?))? *$/
 		# The FFG SW Roll!
 	boost = $1.to_i
