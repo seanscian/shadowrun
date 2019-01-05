@@ -139,7 +139,7 @@ This command accepts several dice roll types:
 
 The color of the sidebar will be green if you rolled any hits, yellow if you didn’t. Red indicates a *Glitch*, while black means *Critical Glitch*. If a Threshold was supplied, green indicates success, yellow indicates failure.
 
-Magicians can, after their roll command, specify the dice to resist drain with the `/drain` token, e.g. `#{cgi["command"]} 18 [8] Clout /drain 13`. This example would perform the roll of 18 pool dice, limit 8, with the comment “Clout”. It would be followed immediately by a roll of 13 dice with the comment “Resist drain for Clout.”
+Magicians can, after their roll command, specify the dice to resist drain (and a comment) with the `/drain` token, e.g. `#{cgi["command"]} 18 [8] Clout /drain 13 S3`. This example would perform the roll of 18 pool dice, limit 8, with the comment “Clout”. It would be followed immediately by a roll of 13 dice with the comment “Resist drain for Clout S3”.
 
 Technomancers can do the same thing, using the `/fading` token. (Technically, magicians can use the `/fading` token and technomancers can use the `/drain` token. It’s the same code.)
 
@@ -281,7 +281,6 @@ when /^\/init +([1-9]{1}[0-9]?)(?:\+([1-5]{1}))?(?: +(.*?))? *$/
 	#    Threshold: 1-2 digits, optional, capture group 4
 	#    Remainder is a comment, capture group 5…
 	#    Unless the /drain or /fading key is used, which is the drain/fading resist pool, capture group 6.
-#when /^(\d{1,2})?(?:\+(\d))?(?: +\[(\d{1,2})\])?(?: +(\d{1,2}))?(?: +(.*?) *(?i:\/(drain|fading) *(\d{1,2}))?)? *$/
 when /^(?:(\d{1,2})?(?:\+(\d))?)(?: +\[(\d{1,2})\])?(?: +(\d{1,2}))?(?: +(.*?)(?i: *\/(drain|fading) +(\d{1,2})(?: +(.*?))?)?)? *$/
 	pool = $1.to_i
 	edge = $2.to_i
