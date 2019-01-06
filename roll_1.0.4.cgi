@@ -11,19 +11,21 @@ require 'sqlite3'
 
 cgi = CGI.new
 
-	# This is a cheap trick. CGI accumulates output and responds accordingly
-	# so I can get timeouts even when I try to use this:
-	#   cgi.out("status" => "OK", "type" => "text/plain", "connection" => "close") { "" }
+	# This is a cheap trick. Apache CGI appears to accumulates output and
+	# release periodically, so I can get timeouts even when I try to use this:
+#cgi.out("status" => "OK", "type" => "text/plain", "connection" => "close") { "" }
 	# The script has to terminate for anything with content length specified
 	# so Apache can release the body with the correct Content-Length header.
 
-	# However, if I print raw output I can specify chunked transfer encoding,
-	# with an immediate end-of-chunked-transfer 0-byte chunk, Apache seems
-	# to consume this and release a Content-Length: 0 response very quickly.
+	# However, if I specify chunked transfer encoding, with an immediate end-of-
+	# chunked-transfer 0-byte chunk, Apache seems to consume this and release a
+	# Content-Length: 0 response very quickly.
 
 puts("Content-type: text/plain\r\nTransfer-Encoding: Chunked\r\n\r\n0\r\n\r\n")
 
-	# Of course, this ends up being the real solution.
+	# Even so, Apache seems to queue the response occasionally; timeouts still
+	# occur. I have to tear down that output channel so Apache releases the
+	# response as soon as possible, so this ends up being the real solution.
 STDOUT.close
 
 database = 'rpdb'
@@ -50,7 +52,7 @@ rpdb = SQLite3::Database.new(database)
 if rpdb.execute("select token from tokens where token is \"#{token}\"").length == 0
 	STDERR.puts('You’re not supposed to be here.')
 	exit
-else
+#else
 #	STDERR.puts('PLAYER ONE HAS ENTERED THE GAME!')
 end
 
