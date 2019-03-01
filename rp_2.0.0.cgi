@@ -51,6 +51,9 @@ end
 $channel_id = cgi["channel_id"].gsub(/[^0-9A-Za-z]/, '')
 $channel_id = $channel_id[0,9]
 
+	# Create recipient array, for private messages.
+$chat_targets = [ $channel_id ]
+
 $user_id = cgi["user_id"].gsub(/[^0-9A-Za-z]/, '')
 $user_id = $user_id[0,9]
 
@@ -133,9 +136,6 @@ if alternates.length > 0
 		# method to redefine the single-level $chat_targets array.
 	$chat_targets = Array.new
 	alternates.each { |chan| $chat_targets[$chat_targets.length] = chan[0] }
-else
-		# Create recipient array, for private messages.
-	$chat_targets = [ $channel_id ]
 end
 
 	# Emote names are just the “first” name.
@@ -204,12 +204,18 @@ def matrixer(username,sl_user,text,priv_footer)
 	matrix_text = matrix_formatter(sl_user,text)
 	$chat_targets.each {
 		|target|
+		case priv_footer
+		when nil
+			attach = nil
+		else
+			attach = [ { "footer" => priv_footer } ]
+		end
 		message = {
 			"username" => username,
 			"icon_url" => $default_icon,
 			"text" => matrix_text,
 			"channel" => target,
-			"attachments" => [ { "footer" => priv_footer } ]
+			"attachments" => attach
 		}
 		post_message($chat_hook,message)
 	}
@@ -219,12 +225,18 @@ def chatter(username,icon_url,text,priv_footer)
 	mention(text,false)
 	$chat_targets.each {
 		|target|
+		case priv_footer
+		when nil
+			attach = nil
+		else
+			attach = [ { "footer" => priv_footer } ]
+		end
 		message = {
 			"username" => username,
 			"icon_url" => icon_url,
 			"text" => text,
 			"channel" => target,
-			"attachments" => [ { "footer" => priv_footer } ]
+			"attachments" => attach
 		}
 		post_message($chat_hook,message)
 	}
@@ -237,12 +249,18 @@ def emoter(emote_name,text,priv_footer)
 	text = mention(text,true)
 	$chat_targets.each {
 		|target|
+		case priv_footer
+		when nil
+			attach = nil
+		else
+			attach = [ { "footer" => priv_footer } ]
+		end
 		message = {
 			"username" => "­",
 			"icon_url" => $default_icon,
 			"text" => "_#{text}_",
 			"channel" => target,
-			"attachments" => [ { "footer" => priv_footer } ]
+			"attachments" => attach
 		}
 		post_message($chat_hook,message)
 	}

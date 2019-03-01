@@ -293,6 +293,7 @@ when /^(?:(\d{1,2})?(?:\+(\d))?)(?: +\[(\d{1,2})\])?(?: +(\d{1,2}))?(?: +(.*?)(?
 	drain_pool = $7.to_i
 	cap_comment = $5.to_s
 	drain_comment = $8.to_s
+	$dice_string = ''
 
 	case $5.to_s
 	when ''
@@ -303,7 +304,9 @@ when /^(?:(\d{1,2})?(?:\+(\d))?)(?: +\[(\d{1,2})\])?(?: +(\d{1,2}))?(?: +(.*?)(?
 
 	def explosion
 #		STDERR.puts("BOOM!") #
-		case rand(6)
+		roll = rand(6)
+		$dice_string = "#{$dice_string}→#{SIX_SIDES[roll]}"
+		case roll
 		when 5
 #			STDERR.puts("XPLD HIT!") #
 			$hits += 1
@@ -337,7 +340,9 @@ when /^(?:(\d{1,2})?(?:\+(\d))?)(?: +\[(\d{1,2})\])?(?: +(\d{1,2}))?(?: +(.*?)(?
 			# Roll the dice in your pool
 		for roll in 1..pool
 				# Here’s the proper randomized roll
-			case rand(6)
+			roll = rand(6)
+			$dice_string = "#{$dice_string}#{SIX_SIDES[roll]}"
+			case roll
 				# This is a zero-failure, with possibility of six (for edge)
 #			case rand(2)+4
 				# This rolls all 1s
@@ -361,7 +366,9 @@ when /^(?:(\d{1,2})?(?:\+(\d))?)(?: +\[(\d{1,2})\])?(?: +(\d{1,2}))?(?: +(.*?)(?
 			# Roll edge dice.
 		for roll in 1..edge
 				# Here’s the proper randomized roll
-			case rand(6)
+			roll = rand(6)
+			$dice_string = "#{$dice_string}#{SIX_SIDES[roll]}"
+			case roll
 				# This is a zero-failure, with possibility of six (for edge)
 #			case rand(2)+4
 				# This rolls all 1s
@@ -510,6 +517,22 @@ when /^(?:(\d{1,2})?(?:\+(\d))?)(?: +\[(\d{1,2})\])?(?: +(\d{1,2}))?(?: +(.*?)(?
 			end
 		end
 
+		detail_button = {
+			"name" => "detail_button",
+			"text" => "Roll Detail…",
+			"type" => "select",
+			"options" => [
+				{
+					"text" => "#{overflow}",
+					"value" => "overflow"
+				},
+				{
+					"text" => "#{$dice_string}",
+					"value" => "dice_string"
+				}
+			]
+		}
+
 		message = {
 			"response_type" => "in_channel",
 			"text" => "*#{sl_user}#{comment}#{iter_comment}*",
@@ -528,9 +551,10 @@ when /^(?:(\d{1,2})?(?:\+(\d))?)(?: +\[(\d{1,2})\])?(?: +(\d{1,2}))?(?: +(.*?)(?
 							"short" => true
 						},
 					],
-					"footer" => overflow,
+#					"footer" => overflow,
 					"callback_id" => "edge_effect",
 					"actions" => [
+						detail_button,
 						second_chance,
 						cc_button
 					]

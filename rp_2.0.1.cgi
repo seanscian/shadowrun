@@ -204,12 +204,18 @@ def matrixer(username,sl_user,text,priv_footer)
 	matrix_text = matrix_formatter(sl_user,text)
 	$chat_targets.each {
 		|target|
+		case priv_footer
+		when nil
+			attach = nil
+		else
+			attach = [ { "footer" => priv_footer } ]
+		end
 		message = {
 			"username" => username,
 			"icon_url" => $default_icon,
 			"text" => matrix_text,
 			"channel" => target,
-			"attachments" => [ { "footer" => priv_footer } ]
+			"attachments" => attach
 		}
 		post_message($chat_hook,message)
 	}
@@ -219,12 +225,18 @@ def chatter(username,icon_url,text,priv_footer)
 	mention(text,false)
 	$chat_targets.each {
 		|target|
+		case priv_footer
+		when nil
+			attach = nil
+		else
+			attach = [ { "footer" => priv_footer } ]
+		end
 		message = {
 			"username" => username,
 			"icon_url" => icon_url,
 			"text" => text,
 			"channel" => target,
-			"attachments" => [ { "footer" => priv_footer } ]
+			"attachments" => attach
 		}
 		post_message($chat_hook,message)
 	}
@@ -237,12 +249,18 @@ def emoter(emote_name,text,priv_footer)
 	text = mention(text,true)
 	$chat_targets.each {
 		|target|
+		case priv_footer
+		when nil
+			attach = nil
+		else
+			attach = [ { "footer" => priv_footer } ]
+		end
 		message = {
 			"username" => "­",
 			"icon_url" => $default_icon,
 			"text" => "_#{text}_",
 			"channel" => target,
-			"attachments" => [ { "footer" => priv_footer } ]
+			"attachments" => attach
 		}
 		post_message($chat_hook,message)
 	}
