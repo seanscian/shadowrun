@@ -23,6 +23,12 @@ cgi = CGI.new
 	# to consume this and release a Content-Length: 0 response very quickly.
 
 puts("Content-type: text/plain\r\nTransfer-Encoding: Chunked\r\n\r\n0\r\n\r\n")
+
+	# Even so, Apache seems to queue the response occasionally; timeouts still
+	# occur. I have to tear down that output channel so Apache releases the
+	# response as soon as possible, so this ends up being the real solution.
+STDOUT.close
+
 database = 'rpdb'
 	# Callbacks POST a JSON object as the HTML-encoded value of the "payload"
 	# CGI variable. This turns it into a Ruby hash… beacuase we’re in Ruby.
@@ -206,17 +212,21 @@ def matrixer(username,sl_user,text,priv_footer)
 		|target|
 		case priv_footer
 		when nil
-			attach = nil
+			message = {
+				"username" => username,
+				"icon_url" => $default_icon,
+				"text" => matrix_text,
+				"channel" => target
+			}
 		else
-			attach = [ { "footer" => priv_footer } ]
+			message = {
+				"username" => username,
+				"icon_url" => $default_icon,
+				"text" => matrix_text,
+				"channel" => target,
+				"attachments" => [ { "footer" => priv_footer } ]
+			}
 		end
-		message = {
-			"username" => username,
-			"icon_url" => $default_icon,
-			"text" => matrix_text,
-			"channel" => target,
-			"attachments" => attach
-		}
 		post_message($chat_hook,message)
 	}
 end
@@ -227,17 +237,21 @@ def chatter(username,icon_url,text,priv_footer)
 		|target|
 		case priv_footer
 		when nil
-			attach = nil
+			message = {
+				"username" => username,
+				"icon_url" => icon_url,
+				"text" => text,
+				"channel" => target
+			}
 		else
-			attach = [ { "footer" => priv_footer } ]
+			message = {
+				"username" => username,
+				"icon_url" => icon_url,
+				"text" => text,
+				"channel" => target,
+				"attachments" => [ { "footer" => priv_footer } ]
+			}
 		end
-		message = {
-			"username" => username,
-			"icon_url" => icon_url,
-			"text" => text,
-			"channel" => target,
-			"attachments" => attach
-		}
 		post_message($chat_hook,message)
 	}
 end
@@ -251,17 +265,21 @@ def emoter(emote_name,text,priv_footer)
 		|target|
 		case priv_footer
 		when nil
-			attach = nil
+			message = {
+				"username" => "­",
+				"icon_url" => $default_icon,
+				"text" => "_#{text}_",
+				"channel" => target
+			}
 		else
-			attach = [ { "footer" => priv_footer } ]
+			message = {
+				"username" => "­",
+				"icon_url" => $default_icon,
+				"text" => "_#{text}_",
+				"channel" => target,
+				"attachments" => [ { "footer" => priv_footer } ]
+			}
 		end
-		message = {
-			"username" => "­",
-			"icon_url" => $default_icon,
-			"text" => "_#{text}_",
-			"channel" => target,
-			"attachments" => attach
-		}
 		post_message($chat_hook,message)
 	}
 end
