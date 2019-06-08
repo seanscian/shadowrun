@@ -808,27 +808,49 @@ when /^(\d{1,2})?d(\d{1,2}|100|%)([+-]\d{1,2})?(?:([+-])(\d{1,2})?d(\d{1,2}|100|
 
 		entered_roll_string = "#{x}d#{y}#{$3.to_s}"
 
-		for i in 1..xp
-			roll = rand(1..yp)
-#			roll = yp # Max Test
-#			roll = 1 # Min Test
-			counter_p[roll] = counter_p[roll].to_i + 1
-			total_p += roll
-		end
-#		STDERR.puts "#{xp}d#{yp}#{$7} = #{total_p}#{comment}#{iter_comment}" #
-#		STDERR.puts counter_p
-		sorted_p = Hash[counter_p.sort_by { |key, val| key}]
+		if p_op != ""
+			for i in 1..xp
+				roll = rand(1..yp)
+#				roll = yp # Max Test
+#				roll = 1 # Min Test
+				counter_p[roll] = counter_p[roll].to_i + 1
+				total_p += roll
+			end
+#			STDERR.puts "#{xp}d#{yp}#{$7} = #{total_p}#{comment}#{iter_comment}" #
+#			STDERR.puts counter_p
+			sorted_p = Hash[counter_p.sort_by { |key, val| key}]
 
-		case p_op
-		when "+"
-			total += total_p
-			entered_roll_string = "#{entered_roll_string}+#{xp}d#{yp}#{$7.to_s}"
-		when "-"
-			total -= total_p
-			entered_roll_string = "#{entered_roll_string}−#{xp}d#{yp}#{$7.to_s}"
+			case p_op
+			when "+"
+				total += total_p
+				entered_roll_string = "#{entered_roll_string}+#{xp}d#{yp}#{$7.to_s}"
+			when "-"
+				total -= total_p
+				entered_roll_string = "#{entered_roll_string}−#{xp}d#{yp}#{$7.to_s}"
+			end
 		end
 
-#		STDERR.puts entered_roll_string.to_s.gsub(/-/,'−')
+		if pp_op != ""
+			for i in 1..xpp
+				roll = rand(1..ypp)
+#				roll = ypp # Max Test
+#				roll = 1 # Min Test
+				counter_pp[roll] = counter_pp[roll].to_i + 1
+				total_pp += roll
+			end
+#			STDERR.puts "#{xpp}d#{ypp}#{$7} = #{total_pp}#{comment}#{iter_comment}" #
+#			STDERR.puts counter_pp
+			sorted_pp = Hash[counter_pp.sort_by { |key, val| key}]
+
+			case pp_op
+			when "+"
+				total += total_pp
+				entered_roll_string = "#{entered_roll_string}+#{xpp}d#{ypp}#{$11.to_s}"
+			when "-"
+				total -= total_pp
+				entered_roll_string = "#{entered_roll_string}−#{xpp}d#{ypp}#{$11.to_s}"
+			end
+		end
 
 		message = {
 			"response_type" => "in_channel",
@@ -848,7 +870,7 @@ when /^(\d{1,2})?d(\d{1,2}|100|%)([+-]\d{1,2})?(?:([+-])(\d{1,2})?d(\d{1,2}|100|
 							"short" => true
 						}
 					],
-					"footer" => "#{sorted.to_s}#{sorted_p.to_s}"
+					"footer" => "#{sorted.to_s}#{sorted_p.to_s}#{sorted_pp.to_s}"
 				}
 			]
 		}
