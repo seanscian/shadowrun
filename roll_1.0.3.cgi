@@ -744,30 +744,59 @@ when /^(?:(\d)b)?(?:(\d)s)?(?:(\d)a)?(?:(\d)d)?(?:(\d)p)?(?:(\d)c)?(?:(\d)f)?(?:
 
 		post_message(cgi["response_url"],message)
 	end
-when /^(\d{1,2})?d(\d{1,2}|100|%)([+-]\d{1,2})?(?: +([^\t ].*?))? *$/
+#when /^(\d{1,2})?d(\d{1,2}|100|%)([+-]\d{1,2})?(?: +([^\t ].*?))? *$/
+	# This should support XdY±Z±AdB±C±DdE±F
+when /^(\d{1,2})?d(\d{1,2}|100|%)([+-]\d{1,2})?(?:([+-])(\d{1,2})?d(\d{1,2}|100|%)([+-]\d{1,2})?)?(?:([+-])(\d{1,2})?d(\d{1,2}|100|%)([+-]\d{1,2})?)?(?: +([^\t ].*?))? *$/
 		# XdY±Z
 	x = $1.to_i
 	y = $2.to_i
 	z = $3.to_i
 
+		# ±XpdYp±Zp
+	p_op = $4.to_s
+	xp = $5.to_i
+	yp = $6.to_i
+	zp = $7.to_i
+
+		# ±XppdYpp±Zpp
+	pp_op = $8.to_s
+	xpp = $9.to_i
+	ypp = $10.to_i
+	zpp = $11.to_i
+
+		# Lacking a number of dice, default to 1; d0=d100 (lame hack here:
+		# the string "%" is accepted and cast to integer via to_i, rendering
+		# it 0, which is why this works.)
 	x == 0 && x = 1
 	y == 0 && y = 100
 
+	xp == 0 && xp = 1
+	yp == 0 && yp = 100
+
+	xpp == 0 && xpp = 1
+	ypp == 0 && ypp = 100
+
 		# Delimit comment, if present.
-	case $4.to_s
+	case $12.to_s
 	when ''
 		iterations > 1 && comment = " — #" or comment = ''
 	else
-		iterations > 1 && comment = " — #{$4} #" or comment = " — #{$4}"
+		iterations > 1 && comment = " — #{$12} #" or comment = " — #{$12}"
 	end
 
 	for iteration in 1..iterations
 		iterations > 1 && iter_comment = iteration
 		total = z
+		total_p = zp
+		total_pp = zpp
 		counter = Hash.new
+		counter_p = Hash.new
+		counter_pp = Hash.new
 
+			# I could make the roller a function, and that’d be better, but
+			# duplicating it here for now.
 		for i in 1..x
-			roll = rand(y) + 1
+			roll = rand(1..y)
 #			roll = y # Max Test
 #			roll = 1 # Min Test
 			counter[roll] = counter[roll].to_i + 1
@@ -776,6 +805,30 @@ when /^(\d{1,2})?d(\d{1,2}|100|%)([+-]\d{1,2})?(?: +([^\t ].*?))? *$/
 #		STDERR.puts "#{x}d#{y}#{$3} = #{total}#{comment}#{iter_comment}" #
 #		STDERR.puts counter
 		sorted = Hash[counter.sort_by { |key, val| key}]
+
+		entered_roll_string = "#{x}d#{y}#{$3.to_s}"
+
+		for i in 1..xp
+			roll = rand(1..yp)
+#			roll = yp # Max Test
+#			roll = 1 # Min Test
+			counter_p[roll] = counter_p[roll].to_i + 1
+			total_p += roll
+		end
+#		STDERR.puts "#{xp}d#{yp}#{$7} = #{total_p}#{comment}#{iter_comment}" #
+#		STDERR.puts counter_p
+		sorted_p = Hash[counter_p.sort_by { |key, val| key}]
+
+		case p_op
+		when "+"
+			total += total_p
+			entered_roll_string = "#{entered_roll_string}+#{xp}d#{yp}#{$7.to_s}"
+		when "-"
+			total -= total_p
+			entered_roll_string = "#{entered_roll_string}−#{xp}d#{yp}#{$7.to_s}"
+		end
+
+#		STDERR.puts entered_roll_string.to_s.gsub(/-/,'−')
 
 		message = {
 			"response_type" => "in_channel",
@@ -790,11 +843,12 @@ when /^(\d{1,2})?d(\d{1,2}|100|%)([+-]\d{1,2})?(?: +([^\t ].*?))? *$/
 							"short" => true
 						},
 						{
-							"value" => "Roll: #{x}d#{y}#{$3.to_s.gsub(/-/,'−')}",
+#							"value" => "Roll: #{x}d#{y}#{$3.to_s.gsub(/-/,'−')}",
+							"value" => "Roll: #{entered_roll_string.to_s.gsub(/-/,'−')}",
 							"short" => true
 						}
 					],
-					"footer" => sorted.to_s
+					"footer" => "#{sorted.to_s}#{sorted_p.to_s}"
 				}
 			]
 		}
