@@ -149,9 +149,11 @@ Technomancers can do the same thing, using the `/fading` token. (Technically, ma
 
 *3.* Roll a Star Wars Boost, Setback, Ability, Difficulty, Proficiency, Challenge, and Force roll using the format `#b#s#a#d#p#c#f`. Each element is optional, but the order is strict.  For example, you can roll `2b3a1p` for 2 Boost, 3 Ability, 1 Proficiency, but they *must* be in the order specified.
 
-*4.* Roll the more standard gaming format of `NdX±Y`, e.g. `#{cgi["command"]} 4d6+2`, `3d8-2`, or `d100`. Omitting the number of dice to roll defaults to 1 rolled die. `d100` can be shortened to `d00`, `d0`, or `d%`.
+*4.* Roll the more standard gaming format of `NdX±Y`, e.g. `#{cgi["command"]} 4d6+2`, `3d8-2`, or `d100`. Omitting the number of dice to roll defaults to 1 rolled die. `d100` can be shortened to `d00`, `d0`, or `d%`. You can now add up to two additional die rolls; the formats are: `NdX±Y`, `NdX±Y±N'dX'±Y'`, `NdX±Y±N'dX'±Y±N"dX"±Y"`.
 
-Any of those will accept, after the roll syntax, a comment to help identify the roll’s purpose, e.g. `#{cgi["command"]} 4+2 Bad Guy #1 Dodge`.
+For example, for an event like damage (1d4) plus sneak attack bonus (1d6) plus strength bonus (3), you would roll `#{cgi["command"]} d4+d6+3`. As the parser is very simple you can unprison your think rhino and roll this obscenity: `/roll 3d7-2-4d3+8+22d2+2`
+
+Any roll will accept, after the roll syntax, a comment to help identify the roll’s purpose, e.g. `#{cgi["command"]} 4+2 Bad Guy #1 Dodge`.
 
 If you use the command `/mroll`, you can specify multiple rolls; typing a number between 1 and 5 after `/mroll`, e.g. `/mroll 3 /init 11+1 Flyspy`, will cause that number of rolls to be made. The number of the roll will be shown, appended to any comment if one was provided.
 
@@ -293,7 +295,6 @@ when /^(?:(\d{1,2})?(?:\+(\d))?)(?: +\[(\d{1,2})\])?(?: +(\d{1,2}))?(?: +(.*?)(?
 	drain_pool = $7.to_i
 	cap_comment = $5.to_s
 	drain_comment = $8.to_s
-	$dice_string = ''
 
 	case $5.to_s
 	when ''
@@ -304,9 +305,7 @@ when /^(?:(\d{1,2})?(?:\+(\d))?)(?: +\[(\d{1,2})\])?(?: +(\d{1,2}))?(?: +(.*?)(?
 
 	def explosion
 #		STDERR.puts("BOOM!") #
-		roll = rand(6)
-		$dice_string = "#{$dice_string}→#{SIX_SIDES[roll]}"
-		case roll
+		case rand(6)
 		when 5
 #			STDERR.puts("XPLD HIT!") #
 			$hits += 1
@@ -340,9 +339,7 @@ when /^(?:(\d{1,2})?(?:\+(\d))?)(?: +\[(\d{1,2})\])?(?: +(\d{1,2}))?(?: +(.*?)(?
 			# Roll the dice in your pool
 		for roll in 1..pool
 				# Here’s the proper randomized roll
-			roll = rand(6)
-			$dice_string = "#{$dice_string}#{SIX_SIDES[roll]}"
-			case roll
+			case rand(6)
 				# This is a zero-failure, with possibility of six (for edge)
 #			case rand(2)+4
 				# This rolls all 1s
@@ -366,9 +363,7 @@ when /^(?:(\d{1,2})?(?:\+(\d))?)(?: +\[(\d{1,2})\])?(?: +(\d{1,2}))?(?: +(.*?)(?
 			# Roll edge dice.
 		for roll in 1..edge
 				# Here’s the proper randomized roll
-			roll = rand(6)
-			$dice_string = "#{$dice_string}#{SIX_SIDES[roll]}"
-			case roll
+			case rand(6)
 				# This is a zero-failure, with possibility of six (for edge)
 #			case rand(2)+4
 				# This rolls all 1s
@@ -517,22 +512,6 @@ when /^(?:(\d{1,2})?(?:\+(\d))?)(?: +\[(\d{1,2})\])?(?: +(\d{1,2}))?(?: +(.*?)(?
 			end
 		end
 
-		detail_button = {
-			"name" => "detail_button",
-			"text" => "Roll Detail…",
-			"type" => "select",
-			"options" => [
-				{
-					"text" => "#{overflow}",
-					"value" => "overflow"
-				},
-				{
-					"text" => "#{$dice_string}",
-					"value" => "dice_string"
-				}
-			]
-		}
-
 		message = {
 			"response_type" => "in_channel",
 			"text" => "*#{sl_user}#{comment}#{iter_comment}*",
@@ -551,10 +530,9 @@ when /^(?:(\d{1,2})?(?:\+(\d))?)(?: +\[(\d{1,2})\])?(?: +(\d{1,2}))?(?: +(.*?)(?
 							"short" => true
 						},
 					],
-#					"footer" => overflow,
+					"footer" => overflow,
 					"callback_id" => "edge_effect",
 					"actions" => [
-						detail_button,
 						second_chance,
 						cc_button
 					]
@@ -768,30 +746,59 @@ when /^(?:(\d)b)?(?:(\d)s)?(?:(\d)a)?(?:(\d)d)?(?:(\d)p)?(?:(\d)c)?(?:(\d)f)?(?:
 
 		post_message(cgi["response_url"],message)
 	end
-when /^(\d{1,2})?d(\d{1,2}|100|%)([+-]\d{1,2})?(?: +([^\t ].*?))? *$/
+#when /^(\d{1,2})?d(\d{1,2}|100|%)([+-]\d{1,2})?(?: +([^\t ].*?))? *$/
+	# This should support XdY±Z±AdB±C±DdE±F
+when /^(\d{1,2})?d(\d{1,2}|100|%)([+-]\d{1,2})?(?:([+-])(\d{1,2})?d(\d{1,2}|100|%)([+-]\d{1,2})?)?(?:([+-])(\d{1,2})?d(\d{1,2}|100|%)([+-]\d{1,2})?)?(?: +([^\t ].*?))? *$/
 		# XdY±Z
 	x = $1.to_i
 	y = $2.to_i
 	z = $3.to_i
 
+		# ±XpdYp±Zp
+	p_op = $4.to_s
+	xp = $5.to_i
+	yp = $6.to_i
+	zp = $7.to_i
+
+		# ±XppdYpp±Zpp
+	pp_op = $8.to_s
+	xpp = $9.to_i
+	ypp = $10.to_i
+	zpp = $11.to_i
+
+		# Lacking a number of dice, default to 1; d0=d100 (lame hack here:
+		# the string "%" is accepted and cast to integer via to_i, rendering
+		# it 0, which is why this works.)
 	x == 0 && x = 1
 	y == 0 && y = 100
 
+	xp == 0 && xp = 1
+	yp == 0 && yp = 100
+
+	xpp == 0 && xpp = 1
+	ypp == 0 && ypp = 100
+
 		# Delimit comment, if present.
-	case $4.to_s
+	case $12.to_s
 	when ''
 		iterations > 1 && comment = " — #" or comment = ''
 	else
-		iterations > 1 && comment = " — #{$4} #" or comment = " — #{$4}"
+		iterations > 1 && comment = " — #{$12} #" or comment = " — #{$12}"
 	end
 
 	for iteration in 1..iterations
 		iterations > 1 && iter_comment = iteration
 		total = z
+		total_p = zp
+		total_pp = zpp
 		counter = Hash.new
+		counter_p = Hash.new
+		counter_pp = Hash.new
 
+			# I could make the roller a function, and that’d be better, but
+			# duplicating it here for now.
 		for i in 1..x
-			roll = rand(y) + 1
+			roll = rand(1..y)
 #			roll = y # Max Test
 #			roll = 1 # Min Test
 			counter[roll] = counter[roll].to_i + 1
@@ -800,6 +807,52 @@ when /^(\d{1,2})?d(\d{1,2}|100|%)([+-]\d{1,2})?(?: +([^\t ].*?))? *$/
 #		STDERR.puts "#{x}d#{y}#{$3} = #{total}#{comment}#{iter_comment}" #
 #		STDERR.puts counter
 		sorted = Hash[counter.sort_by { |key, val| key}]
+
+		entered_roll_string = "#{x}d#{y}#{$3.to_s}"
+
+		if p_op != ""
+			for i in 1..xp
+				roll = rand(1..yp)
+#				roll = yp # Max Test
+#				roll = 1 # Min Test
+				counter_p[roll] = counter_p[roll].to_i + 1
+				total_p += roll
+			end
+#			STDERR.puts "#{xp}d#{yp}#{$7} = #{total_p}#{comment}#{iter_comment}" #
+#			STDERR.puts counter_p
+			sorted_p = Hash[counter_p.sort_by { |key, val| key}]
+
+			case p_op
+			when "+"
+				total += total_p
+				entered_roll_string = "#{entered_roll_string}+#{xp}d#{yp}#{$7.to_s}"
+			when "-"
+				total -= total_p
+				entered_roll_string = "#{entered_roll_string}−#{xp}d#{yp}#{$7.to_s}"
+			end
+		end
+
+		if pp_op != ""
+			for i in 1..xpp
+				roll = rand(1..ypp)
+#				roll = ypp # Max Test
+#				roll = 1 # Min Test
+				counter_pp[roll] = counter_pp[roll].to_i + 1
+				total_pp += roll
+			end
+#			STDERR.puts "#{xpp}d#{ypp}#{$7} = #{total_pp}#{comment}#{iter_comment}" #
+#			STDERR.puts counter_pp
+			sorted_pp = Hash[counter_pp.sort_by { |key, val| key}]
+
+			case pp_op
+			when "+"
+				total += total_pp
+				entered_roll_string = "#{entered_roll_string}+#{xpp}d#{ypp}#{$11.to_s}"
+			when "-"
+				total -= total_pp
+				entered_roll_string = "#{entered_roll_string}−#{xpp}d#{ypp}#{$11.to_s}"
+			end
+		end
 
 		message = {
 			"response_type" => "in_channel",
@@ -814,11 +867,12 @@ when /^(\d{1,2})?d(\d{1,2}|100|%)([+-]\d{1,2})?(?: +([^\t ].*?))? *$/
 							"short" => true
 						},
 						{
-							"value" => "Roll: #{x}d#{y}#{$3.to_s.gsub(/-/,'−')}",
+#							"value" => "Roll: #{x}d#{y}#{$3.to_s.gsub(/-/,'−')}",
+							"value" => "Roll: #{entered_roll_string.to_s.gsub(/-/,'−')}",
 							"short" => true
 						}
 					],
-					"footer" => sorted.to_s
+					"footer" => "#{sorted.to_s}#{sorted_p.to_s}#{sorted_pp.to_s}"
 				}
 			]
 		}
