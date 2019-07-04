@@ -171,12 +171,12 @@ end
 
 	# Receives a string of text to search for character names. highlight is true/false.
 def mention(message,highlight)
-#	$rpdb.execute("SELECT DISTINCT substr(trim(charname),1,instr(trim(charname)||' ',' ')-1) FROM characters WHERE config IS #{$db_config} AND slack_user IS NOT \"#{$user_id}\" and GM is null").each {
-	$rpdb.execute("SELECT DISTINCT substr(trim(charname),1,instr(trim(charname)||' ',' ')-1) FROM characters WHERE config IS #{$db_config} AND GM is null").each {
+	$rpdb.execute("SELECT DISTINCT substr(trim(charname),1,instr(trim(charname)||' ',' ')-1) FROM characters WHERE config IS #{$db_config} AND slack_user IS NOT \"#{$user_id}\" AND GM IS null").each {
 		|x|
 		if /\b#{x[0]}\b/.match(message.to_s)
 			$rpdb.execute("SELECT DISTINCT slack_user FROM characters WHERE charname LIKE \"#{x[0]}%\" AND config IS #{$db_config}").each {
 				|n|
+					# The channel notation seems to change in Slack. It used to be <#123456|name>, then just #123456, now it’s <#123456>
 				notify_message = {
 					"text" => "#{x[0]} was mentioned by #{$emote_name} in <##{$channel_id}>.",
 					"channel" => n[0]
