@@ -41,6 +41,11 @@ else
 		#    with an immediate end-of-chunked-transfer 0-byte chunk, Apache seems
 		#    consumes this and release a Content-Length: 0 response very quickly.
 	puts("Content-type: text/plain\r\nTransfer-Encoding: Chunked\r\n\r\n0\r\n\r\n")
+		# Even so, Apache seems to queue the response occasionally; timeouts still
+		# occur. I have to tear down that output channel so Apache releases the
+		# response as soon as possible, so this ends up being the real solution.
+	STDOUT.close
+
 end
 
 #slack_event["event"].each { |key,value| STDERR.puts "#{key} => #{value}" } #
