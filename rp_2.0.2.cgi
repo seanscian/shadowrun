@@ -205,11 +205,10 @@ end
 def matrix_formatter(user,text)
 	case $online_prog.to_s
 	when "matrix"
-			# This is the year in Shadowrun
-		sr_date = DateTime.now.next_year(59).to_time.strftime("< %H:%M:%S / %m-%d-%C%y >")
-		return "­>>>>>[ #{text} ]<<<<<\n— #{user} #{sr_date}"
+			# The year in Shadowrun is current +59.
+		return "­>>>>>[ #{text} ]<<<<<\n— #{user} #{DateTime.now.next_year(59).to_time.strftime("< %H:%M:%S / %m-%d-%C%y >")}"
 	when "esteren_telepathy"
-		return "*#{user}* `>>` #{text} `<<`"
+		return "*#{user}* `>>` #{text.gsub('`','')} `<<`"
 	else
 		return "\`#{$prefix}#{text.gsub('`','')}#{$suffix}#{$emote_name}\ \<#{Time.new.to_i}\>`"
 	end
