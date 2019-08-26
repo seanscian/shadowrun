@@ -137,7 +137,7 @@ end
 help_text = <<HELPTEXT
 This command accepts several dice roll types:
 
-*1.* Roll a _Shadowrun_ dice pool of the format `p+e`, e.g. `#{cgi["command"]} 5+3`, where 5 is your dice pool and 3 is your Edge dice. You can omit either, but not both, e.g. `#{cgi["command"]} 5` or `#{cgi["command"]} +3`. This type also accepts optional Limit and Threshold, e.g. `#{cgi["command"]} 10+2 3`, `#{cgi["command"]} 10+2 [5] 3`, or `#{cgi["command"]} 10+2 [4]`.
+*1.* Roll a _Shadowrun_ dice pool of the format `p+e`, e.g. `#{cgi["command"]} 5+3`, where 5 is your dice pool and 3 is your Edge dice. You can omit either, but not both, e.g. `#{cgi["command"]} 5` or `#{cgi["command"]} +3`. This type also accepts optional Limit and Threshold, e.g. `#{cgi["command"]} 10+2 (3)`, `#{cgi["command"]} 10+2 [5] (3)`, or `#{cgi["command"]} 10+2 [4]`.
 
 The color of the sidebar will be green if you rolled any hits, yellow if you didn’t. Red indicates a *Glitch*, while black means *Critical Glitch*. If a Threshold was supplied, green indicates success, yellow indicates failure.
 
@@ -285,7 +285,8 @@ when /^\/init +([1-9]{1}[0-9]?)(?:\+([1-5]{1}))?(?: +(.*?))? *$/
 	#    Threshold: 1-2 digits, optional, capture group 4
 	#    Remainder is a comment, capture group 5…
 	#    Unless the /drain or /fading key is used, which is the drain/fading resist pool, capture group 6.
-when /^(?:(\d{1,2})?(?:\+(\d))?)(?: +\[(\d{1,2})\])?(?: +(\d{1,2}))?(?: +(.*?)(?i: *\/(drain|fading) +(\d{1,2})(?: +(.*?))?)?)? *$/
+#when /^(?:(\d{1,2})?(?:\+(\d))?)(?: +\[(\d{1,2})\])?(?: +(\d{1,2}))?(?: +(.*?)(?i: *\/(drain|fading) +(\d{1,2})(?: +(.*?))?)?)? *$/
+when /^(?:(\d{1,2})?(?:\+(\d))?)(?: +\[(\d{1,2})\])?(?: +\((\d{1,2})\))?(?: +(.*?)(?i: *\/(drain|fading) +(\d{1,2})(?: +(.*?))?)?)? *$/
 	pool = $1.to_i
 	edge = $2.to_i
 	edge == 0 && limit = $3.to_i or limit = 100 # Rolled Edge? No Limit
