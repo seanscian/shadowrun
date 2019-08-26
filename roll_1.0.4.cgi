@@ -476,6 +476,8 @@ when /^(?:(\d{1,2})?(?:\+(\d))?)(?: +\[(\d{1,2})\])?(?: +\((\d{1,2})\))?(?: +(.*
 			overflow = nil
 		end
 
+		net = nil
+		net_string = nil
 		if threshold > 0
 			if $hits >= threshold
 				net = $hits - threshold
