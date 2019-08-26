@@ -137,7 +137,7 @@ end
 help_text = <<HELPTEXT
 This command accepts several dice roll types:
 
-*1.* Roll a _Shadowrun_ dice pool of the format `p+e`, e.g. `#{cgi["command"]} 5+3`, where 5 is your dice pool and 3 is your Edge dice. You can omit either, but not both, e.g. `#{cgi["command"]} 5` or `#{cgi["command"]} +3`. This type also accepts optional Limit and Threshold, e.g. `#{cgi["command"]} 10+2 (3)`, `#{cgi["command"]} 10+2 [5] (3)`, or `#{cgi["command"]} 10+2 [4]`.
+*1.* Roll a _Shadowrun_ dice pool of the format `p+e`, e.g. `#{cgi["command"]} 5+3`, where 5 is your dice pool and 3 is your Edge dice. You can omit either, but not both, e.g. `#{cgi["command"]} 5` or `#{cgi["command"]} +3`. This type also accepts optional [Limit] and (Threshold), e.g. `#{cgi["command"]} 10+2 (3)`, `#{cgi["command"]} 10+2 [5] (3)`, or `#{cgi["command"]} 10+2 [4]`.
 
 The color of the sidebar will be green if you rolled any hits, yellow if you didn’t. Red indicates a *Glitch*, while black means *Critical Glitch*. If a Threshold was supplied, green indicates success, yellow indicates failure.
 
