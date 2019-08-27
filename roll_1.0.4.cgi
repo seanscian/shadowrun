@@ -159,7 +159,7 @@ If you use the command `/mroll`, you can specify multiple rolls; typing a number
 
 *IMPORTANT:* Tab no longer repeats the last command in Slack, so the old trick of using a zero dice in the unused fields isn’t as useful anymore. Consider copy/pasting something to the private chat Slack gives you with yourself, e.g. `#{cgi["command"]} 1b0s2a2d1p0c0f`, so you can revisit that for formatting. Of course, you can always just invoke this help and copy paste it from here.
 
-Finally, you can roll dice privately in your own direct message channel. The results are visible only to you and lets bots interact with the result if they’re configured to.
+Finally, you can roll dice generically in any Channel or Direct Message; no specific character name will be attached to the roll, but all other functions remain unchanged. This means you can even use `/roll` in your own direct message channel if you don’t want to share the results.
 HELPTEXT
 
 case text
