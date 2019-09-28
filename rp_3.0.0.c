@@ -130,37 +130,51 @@ int main(void)
 			occur. I have to tear down that output channel so Apache releases
 			the response as soon as possible, so this ends up being the real
 			solution:
-	
-			fclose(stdout);
-		*/
-	
-		/*
-			This is actually just some test code. Ultimately it goes away and
-			turns into a zero-length chunk or a Content-Length: 0 and close
-			stdout.
-		*/
-	char *useragent = getenv("HTTP_USER_AGENT");
-	int ualen = 0;
-	printf("Content-type: text/plain\r\nTransfer-Encoding: Chunked\r\n\r\n");
 
-		/* If you actually have a user agent string */
-	if (useragent != NULL)
+			Answer quickly and close stdout so Apache releases and Slack gets
+			its timely response.
+		*/
+
+/*	printf("Content-type: text/plain\r\nContent-Length: 0\r\nConnection: close\r\n\r\n"); */
+
+	char *token;
+	char *CGI_CONTENT_LENGTH = getenv("CONTENT_LENGTH");
+	int content_length = 0;
+
+	if (CGI_CONTENT_LENGTH != NULL)
+		content_length = atoi(CGI_CONTENT_LENGTH);
+
+	printf("Content-type: text/plain\r\nTransfer-Encoding: Chunked\r\nConnection: close\r\n\r\n");
+
+/* char *CGI_USER_AGENT = getenv("HTTP_USER_AGENT");
+	int ualen = 0;
+
+	if (CGI_USER_AGENT != NULL)
 	{
-			/* send the chunk */
-		ualen = strlen(useragent);
-		printf("%x\r\n",ualen);
-		printf("%s\r\n",useragent);
+		ualen = strlen(CGI_USER_AGENT);
+		fprintf(stderr,"%x\r\n",ualen);
+		fprintf(stderr,"%s\n",CGI_USER_AGENT);
+	}
+*/
+
+	if (content_length > 0)
+	{
+/*		int cllen = strlen(CGI_CONTENT_LENGTH);
+		fprintf(stderr,"%x\r\n",cllen); */
+		fprintf(stderr,"%d\n",content_length);
 	}
 
 	printf("0\r\n\r\n");
-		/* The test code ends here. */
-
-		/* Close stdout so Apache releases and Slack gets its timely response. */
 	fclose(stdout);
 
 		/*
-			 ALL THE CODE FOR THE RP BOT GOES HERE.
+			ALL THE CODE FOR THE RP BOT GOES HERE.
 		*/
+
+		/* Database is? This is where I will likely change to a simpler
+			configuration, probably a simple text file. */
+/*	token = cgigetval("token");
+	fprintf(stderr,"%s",token); */
 
 		/* If you get to the end, exit fine. */
 	return 0;
