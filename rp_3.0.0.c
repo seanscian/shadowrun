@@ -162,14 +162,23 @@ int main(void)
 /*		int cllen = strlen(CGI_CONTENT_LENGTH);
 		fprintf(stderr,"%x\r\n",cllen); */
 		fprintf(stderr,"%d\n",content_length);
+
+			/* Read content_length bytes of stdin here and pass it like query string to CGI handler. */
 	}
 
 	printf("0\r\n\r\n");
 	fclose(stdout);
 
 		/*
-			ALL THE CODE FOR THE RP BOT GOES HERE.
+			ALMOST ALL THE CODE FOR THE RP BOT GOES HERE.
+			Some abstraction should occur, like posting the JSON objects back to Slack.
 		*/
+
+
+
+
+
+
 
 		/* Database is? This is where I will likely change to a simpler
 			configuration, probably a simple text file. */

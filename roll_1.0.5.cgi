@@ -620,6 +620,7 @@ when /^(?:(\d)b)?(?:(\d)s)?(?:(\d)a)?(?:(\d)d)?(?:(\d)p)?(?:(\d)c)?(?:(\d)f)?(?:
 
 	for iteration in 1..iterations
 		adv=0; suc=0; fal=0; thr=0; tri=0; des=0; drk=0; lht=0; sf_roll=0; sw_value=0
+		sw_detail = "#{cheating[1]}\n"
 
 		# If /mroll was called format/number the comment
 		if iterations > 1
@@ -633,49 +634,85 @@ when /^(?:(\d)b)?(?:(\d)s)?(?:(\d)a)?(?:(\d)d)?(?:(\d)p)?(?:(\d)c)?(?:(\d)f)?(?:
 
 		for i in 1..boost
 			roll = rand(6)
-			adv += dice["boost"]["adv"][roll]
-			suc += dice["boost"]["suc"][roll]
+			boost_adv = dice["boost"]["adv"][roll]
+			boost_suc = dice["boost"]["suc"][roll]
+			adv += boost_adv
+			suc += boost_suc
 			sf_roll = 1
+			sw_detail << "*Boost #{i}:* #{boost_adv} Advantage, #{boost_suc} Success\n"
 		end
 		for i in 1..setbk
 			roll = rand(6)
-			fal += dice["setbk"]["fal"][roll]
-			thr += dice["setbk"]["thr"][roll]
+			setbk_fal = dice["setbk"]["fal"][roll]
+			setbk_thr = dice["setbk"]["thr"][roll]
+			fal += setbk_fal
+			thr += setbk_thr
 			sf_roll = 1
+			sw_detail << "*Setback #{i}:* #{setbk_thr} Threat, #{setbk_fal} Failure\n"
 		end
 		for i in 1..abilt
 			roll = rand(8)
-			adv += dice["abilt"]["adv"][roll]
-			suc += dice["abilt"]["suc"][roll]
+			abilt_adv = dice["abilt"]["adv"][roll]
+			abilt_suc = dice["abilt"]["suc"][roll]
+			adv += abilt_adv
+			suc += abilt_suc
 			sf_roll = 1
+			sw_detail << "*Ability #{i}:* #{abilt_adv} Advantage, #{abilt_suc} Success\n"
 		end
 		for i in 1..dfclt
 			roll = rand(8)
-			fal += dice["dfclt"]["fal"][roll]
-			thr += dice["dfclt"]["thr"][roll]
+			dfclt_fal = dice["dfclt"]["fal"][roll]
+			dfclt_thr = dice["dfclt"]["thr"][roll]
+			fal += dfclt_fal
+			thr += dfclt_thr
 			sf_roll = 1
+			sw_detail << "*Difficulty #{i}:* #{dfclt_thr} Threat, #{dfclt_fal} Failure\n"
 		end
 		for i in 1..prfnc
 			roll = rand(12)
-			adv += dice["prfnc"]["adv"][roll]
-			suc += dice["prfnc"]["suc"][roll]
-			tri += dice["prfnc"]["tri"][roll]
+			prfnc_adv = dice["prfnc"]["adv"][roll]
+			prfnc_suc = dice["prfnc"]["suc"][roll]
+			prfnc_tri = dice["prfnc"]["tri"][roll]
+			adv += prfnc_adv
+			suc += prfnc_suc
+			tri += prfnc_tri
 			sf_roll = 1
+			sw_detail << "*Proficiency #{i}:* #{prfnc_adv} Advantage, #{prfnc_suc} Success, #{prfnc_tri} Triumph\n"
 		end
 		for i in 1..chlng
 			roll = rand(12)
-			fal += dice["chlng"]["fal"][roll]
-			thr += dice["chlng"]["thr"][roll]
-			des += dice["chlng"]["des"][roll]
+			chlng_fal = dice["chlng"]["fal"][roll]
+			chlng_thr = dice["chlng"]["thr"][roll]
+			chlng_des = dice["chlng"]["des"][roll]
+			fal += chlng_fal
+			thr += chlng_thr
+			des += chlng_des
 			sf_roll = 1
+			sw_detail << "*Challenge #{i}:* #{chlng_thr} Threat, #{chlng_fal} Failure, #{chlng_des} Despair\n"
 		end
 		for i in 1..force
 			roll = rand(12)
-			drk += dice["force"]["drk"][roll]
-			lht += dice["force"]["lht"][roll]
+			force_drk = dice["force"]["drk"][roll]
+			force_lht = dice["force"]["lht"][roll]
+			drk += force_drk
+			lht += force_lht
+			sw_detail << "*Force #{i}:* #{force_lht} Light, #{force_drk} Dark\n"
 		end
 #		STDERR.puts "FFG SW Roll ##{iteration}! #{boost} #{setbk} #{abilt} #{dfclt} #{prfnc} #{chlng} #{force} #{comment}#{iteration}" #
 #		STDERR.puts "ADV: #{adv}  THR: #{thr}  SUC: #{suc}  FAL: #{fal}  TRI: #{tri}  DES: #{des}  DRK: #{drk}  LHT: #{lht}" #
+
+		 sw_detail_button = {
+			"name" => "sw_detail_button",
+			"text" => "Roll Detail…",
+			"type" => "button",
+			"value" => "#{user_id}",
+			"confirm" => {
+				"title" => "Roll Detail",
+#				"ok_text" => "Yes",
+#				"dismiss_text" => "No",
+				"text" => sw_detail
+			}
+		}
 
 		success = suc + tri
 		failure = fal + des
@@ -720,7 +757,7 @@ when /^(?:(\d)b)?(?:(\d)s)?(?:(\d)a)?(?:(\d)d)?(?:(\d)p)?(?:(\d)c)?(?:(\d)f)?(?:
 
 			# More complete debug, but information that’s displayed anyway.
 #		debug = "#{boost}b#{setbk}s#{abilt}a#{dfclt}d#{prfnc}p#{chlng}c#{force}f\n#{success} Success #{failure} Failure #{adv} Advantage #{thr} Threat\n#{tri} Triumph #{des} Despair #{drk} Dark #{lht} Light"
-		debug = "#{cheating[1]}\n#{success} Success #{failure} Failure #{adv} Advantage #{thr} Threat"
+#		debug = "#{cheating[1]}\n#{success} Success #{failure} Failure #{adv} Advantage #{thr} Threat"
 
 		message = {
 			"response_type" => "in_channel",
@@ -741,8 +778,11 @@ when /^(?:(\d)b)?(?:(\d)s)?(?:(\d)a)?(?:(\d)d)?(?:(\d)p)?(?:(\d)c)?(?:(\d)f)?(?:
 							"short" => "true"
 						}
 					],
-					"footer" => debug,
-					"thumb_url" => chat_icon
+#					"footer" => debug,
+					"thumb_url" => chat_icon,
+					"actions" => [
+						sw_detail_button
+					]
 				}
 			]
 		}
