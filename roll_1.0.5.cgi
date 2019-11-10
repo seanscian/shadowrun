@@ -708,8 +708,8 @@ when /^(?:(\d)b)?(?:(\d)s)?(?:(\d)a)?(?:(\d)d)?(?:(\d)p)?(?:(\d)c)?(?:(\d)f)?(?:
 			"value" => "#{user_id}",
 			"confirm" => {
 				"title" => "Roll Detail",
-#				"ok_text" => "Yes",
-#				"dismiss_text" => "No",
+#				"ok_text" => nil,
+#				"dismiss_text" => nil,
 				"text" => sw_detail
 			}
 		}
