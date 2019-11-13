@@ -620,7 +620,8 @@ when /^(?:(\d)b)?(?:(\d)s)?(?:(\d)a)?(?:(\d)d)?(?:(\d)p)?(?:(\d)c)?(?:(\d)f)?(?:
 
 	for iteration in 1..iterations
 		adv=0; suc=0; fal=0; thr=0; tri=0; des=0; drk=0; lht=0; sf_roll=0; sw_value=0
-		sw_detail = "#{cheating[1]}\n"
+#		sw_detail = "#{cheating}\n"
+		sw_detail = [[],[],[],[],[],[],[]]
 
 		# If /mroll was called format/number the comment
 		if iterations > 1
@@ -639,7 +640,10 @@ when /^(?:(\d)b)?(?:(\d)s)?(?:(\d)a)?(?:(\d)d)?(?:(\d)p)?(?:(\d)c)?(?:(\d)f)?(?:
 			adv += boost_adv
 			suc += boost_suc
 			sf_roll = 1
-			sw_detail << "*Boost #{i}:* #{boost_adv} Advantage, #{boost_suc} Success\n"
+			sw_detail[0][i] = {
+				"text" => "#{boost_adv} Advantage, #{boost_suc} Success",
+				"value" => "boost_#{i}"
+			}
 		end
 		for i in 1..setbk
 			roll = rand(6)
@@ -648,7 +652,10 @@ when /^(?:(\d)b)?(?:(\d)s)?(?:(\d)a)?(?:(\d)d)?(?:(\d)p)?(?:(\d)c)?(?:(\d)f)?(?:
 			fal += setbk_fal
 			thr += setbk_thr
 			sf_roll = 1
-			sw_detail << "*Setback #{i}:* #{setbk_thr} Threat, #{setbk_fal} Failure\n"
+			sw_detail[1][i] = {
+				"text" => "#{setbk_thr} Threat, #{setbk_fal} Failure",
+				"value" => "setbk_#{i}"
+			}
 		end
 		for i in 1..abilt
 			roll = rand(8)
@@ -657,7 +664,10 @@ when /^(?:(\d)b)?(?:(\d)s)?(?:(\d)a)?(?:(\d)d)?(?:(\d)p)?(?:(\d)c)?(?:(\d)f)?(?:
 			adv += abilt_adv
 			suc += abilt_suc
 			sf_roll = 1
-			sw_detail << "*Ability #{i}:* #{abilt_adv} Advantage, #{abilt_suc} Success\n"
+			sw_detail[2][i] = {
+				"text" => "#{abilt_adv} Advantage, #{abilt_suc} Success",
+				"value" => "setbk_#{i}"
+			}
 		end
 		for i in 1..dfclt
 			roll = rand(8)
@@ -666,7 +676,10 @@ when /^(?:(\d)b)?(?:(\d)s)?(?:(\d)a)?(?:(\d)d)?(?:(\d)p)?(?:(\d)c)?(?:(\d)f)?(?:
 			fal += dfclt_fal
 			thr += dfclt_thr
 			sf_roll = 1
-			sw_detail << "*Difficulty #{i}:* #{dfclt_thr} Threat, #{dfclt_fal} Failure\n"
+			sw_detail[3][i] = {
+				"text" => "#{dfclt_thr} Threat, #{dfclt_fal} Failure",
+				"value" => "setbk_#{i}"
+			}
 		end
 		for i in 1..prfnc
 			roll = rand(12)
@@ -677,7 +690,10 @@ when /^(?:(\d)b)?(?:(\d)s)?(?:(\d)a)?(?:(\d)d)?(?:(\d)p)?(?:(\d)c)?(?:(\d)f)?(?:
 			suc += prfnc_suc
 			tri += prfnc_tri
 			sf_roll = 1
-			sw_detail << "*Proficiency #{i}:* #{prfnc_adv} Advantage, #{prfnc_suc} Success, #{prfnc_tri} Triumph\n"
+			sw_detail[4][i] = {
+				"text" => "#{prfnc_adv} Advantage, #{prfnc_suc} Success, #{prfnc_tri} Triumph",
+				"value" => "setbk_#{i}"
+			}
 		end
 		for i in 1..chlng
 			roll = rand(12)
@@ -688,7 +704,10 @@ when /^(?:(\d)b)?(?:(\d)s)?(?:(\d)a)?(?:(\d)d)?(?:(\d)p)?(?:(\d)c)?(?:(\d)f)?(?:
 			thr += chlng_thr
 			des += chlng_des
 			sf_roll = 1
-			sw_detail << "*Challenge #{i}:* #{chlng_thr} Threat, #{chlng_fal} Failure, #{chlng_des} Despair\n"
+			sw_detail[5][i] = {
+				"text" => "#{chlng_thr} Threat, #{chlng_fal} Failure, #{chlng_des} Despair",
+				"value" => "setbk_#{i}"
+			}
 		end
 		for i in 1..force
 			roll = rand(12)
@@ -696,22 +715,13 @@ when /^(?:(\d)b)?(?:(\d)s)?(?:(\d)a)?(?:(\d)d)?(?:(\d)p)?(?:(\d)c)?(?:(\d)f)?(?:
 			force_lht = dice["force"]["lht"][roll]
 			drk += force_drk
 			lht += force_lht
-			sw_detail << "*Force #{i}:* #{force_lht} Light, #{force_drk} Dark\n"
+			sw_detail[6][i] = {
+				"text" => "#{force_lht} Light, #{force_drk} Dark",
+				"value" => "setbk_#{i}"
+			}
 		end
 #		STDERR.puts "FFG SW Roll ##{iteration}! #{boost} #{setbk} #{abilt} #{dfclt} #{prfnc} #{chlng} #{force} #{comment}#{iteration}" #
 #		STDERR.puts "ADV: #{adv}  THR: #{thr}  SUC: #{suc}  FAL: #{fal}  TRI: #{tri}  DES: #{des}  DRK: #{drk}  LHT: #{lht}" #
-
-		 sw_detail_button = {
-			"name" => "sw_detail_button",
-			"text" => "Roll Detail…",
-			"type" => "button",
-			"confirm" => {
-				"title" => "Roll Detail",
-#				"ok_text" => nil,
-#				"dismiss_text" => nil,
-				"text" => sw_detail
-			}
-		}
 
 		success = suc + tri
 		failure = fal + des
@@ -757,6 +767,57 @@ when /^(?:(\d)b)?(?:(\d)s)?(?:(\d)a)?(?:(\d)d)?(?:(\d)p)?(?:(\d)c)?(?:(\d)f)?(?:
 			# More complete debug, but information that’s displayed anyway.
 #		debug = "#{boost}b#{setbk}s#{abilt}a#{dfclt}d#{prfnc}p#{chlng}c#{force}f\n#{success} Success #{failure} Failure #{adv} Advantage #{thr} Threat\n#{tri} Triumph #{des} Despair #{drk} Dark #{lht} Light"
 #		debug = "#{cheating[1]}\n#{success} Success #{failure} Failure #{adv} Advantage #{thr} Threat"
+		debug = "#{success} Success #{failure} Failure #{adv} Advantage #{thr} Threat"
+
+		sw_detail_button = {
+			"name" => "sw_detail_button",
+			"text" => "#{cheating[1]}",
+#			"text" => "#{debug}",
+			"type" => "select",
+			"option_groups" => [
+				{
+					"text" => "Roll",
+					"options" => [
+						{
+							"text" => "#{cheating[1]}",
+							"value" => "empty"
+#						},
+#						{
+#							"text" => "#{debug}",
+#							"value" => "empty"
+						}
+					]
+				},
+				{
+					"text" => "Boost",
+					"options" => sw_detail[0]
+				},
+				{
+					"text" => "Setback",
+					"options" => sw_detail[1]
+				},
+				{
+					"text" => "Ability",
+					"options" => sw_detail[2]
+				},
+				{
+					"text" => "Difficulty",
+					"options" => sw_detail[3]
+				},
+				{
+					"text" => "Proficiency",
+					"options" => sw_detail[4]
+				},
+				{
+					"text" => "Challenge",
+					"options" => sw_detail[5]
+				},
+				{
+					"text" => "Force",
+					"options" => sw_detail[6]
+				}
+			]
+		}
 
 		message = {
 			"response_type" => "in_channel",
@@ -777,7 +838,7 @@ when /^(?:(\d)b)?(?:(\d)s)?(?:(\d)a)?(?:(\d)d)?(?:(\d)p)?(?:(\d)c)?(?:(\d)f)?(?:
 							"short" => "true"
 						}
 					],
-#					"footer" => debug,
+					"footer" => "#{debug}",
 					"thumb_url" => chat_icon,
 					"actions" => [
 						sw_detail_button

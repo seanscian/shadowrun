@@ -781,10 +781,10 @@ when /^(?:(\d)b)?(?:(\d)s)?(?:(\d)a)?(?:(\d)d)?(?:(\d)p)?(?:(\d)c)?(?:(\d)f)?(?:
 						{
 							"text" => "#{cheating[1]}",
 							"value" => "empty"
-						},
-						{
-							"text" => "#{debug}",
-							"value" => "empty"
+#						},
+#						{
+#							"text" => "#{debug}",
+#							"value" => "empty"
 						}
 					]
 				},
@@ -838,6 +838,7 @@ when /^(?:(\d)b)?(?:(\d)s)?(?:(\d)a)?(?:(\d)d)?(?:(\d)p)?(?:(\d)c)?(?:(\d)f)?(?:
 							"short" => "true"
 						}
 					],
+					"footer" => "#{debug}",
 					"thumb_url" => chat_icon,
 					"actions" => [
 						sw_detail_button
