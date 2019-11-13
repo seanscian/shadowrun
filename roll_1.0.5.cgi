@@ -137,7 +137,7 @@ end
 help_text = <<HELPTEXT
 This command accepts several dice roll types:
 
-*1.* Roll a _Shadowrun_ dice pool of the format `p+e`, e.g. `#{cgi["command"]} 5+3`, where 5 is your dice pool and 3 is your Edge dice. You can omit either, but not both, e.g. `#{cgi["command"]} 5` or `#{cgi["command"]} +3`. This type also accepts optional [Limit] and (Threshold), e.g. `#{cgi["command"]} 10+2 (3)`, `#{cgi["command"]} 10+2 [5] (3)`, or `#{cgi["command"]} 10+2 [4]`.
+*1.* Roll a _*Shadowrun*_ dice pool of the format `p+e`, e.g. `#{cgi["command"]} 5+3`, where 5 is your dice pool and 3 is your Edge dice. You can omit either, but not both, e.g. `#{cgi["command"]} 5` or `#{cgi["command"]} +3`. This type also accepts optional [Limit] and (Threshold), e.g. `#{cgi["command"]} 10+2 (3)`, `#{cgi["command"]} 10+2 [5] (3)`, or `#{cgi["command"]} 10+2 [4]`.
 
 The color of the sidebar will be green if you rolled any hits, yellow if you didn’t. Red indicates a *Glitch*, while black means *Critical Glitch*. If a Threshold was supplied, green indicates success, yellow indicates failure.
 
@@ -145,9 +145,11 @@ Magicians can, after their roll command, specify the dice to resist drain (and a
 
 Technomancers can do the same thing, using the `/fading` token. (Technically, magicians can use the `/fading` token and technomancers can use the `/drain` token. It’s the same code.)
 
-*2.* Roll a _Shadowrun_ initiative roll using the format `r+i`, e.g. `#{cgi["command"]} /init 9+4`, where 9 is your Reaction a 4 is your effective Initiative pool. If you omit the +#, e.g. `#{cgi["command"]} /init 9`, the roller assumes a single initiative die.
+*2.* Roll a _*Shadowrun*_ initiative roll using the format `r+i`, e.g. `#{cgi["command"]} /init 9+4`, where 9 is your Reaction a 4 is your effective Initiative pool. If you omit the +#, e.g. `#{cgi["command"]} /init 9`, the roller assumes a single initiative die.
 
-*3.* Roll a Star Wars Boost, Setback, Ability, Difficulty, Proficiency, Challenge, and Force roll using the format `#b#s#a#d#p#c#f`. Each element is optional, but the order is strict.  For example, you can roll `2b3a1p` for 2 Boost, 3 Ability, 1 Proficiency, but they *must* be in the order specified.
+*3.* Roll a _*Star Wars*_ Boost, Setback, Ability, Difficulty, Proficiency, Challenge, and Force roll using the format `#b#s#a#d#p#c#f`. Each element is optional, but the order is strict.  For example, you can roll `2b3a1p` for 2 Boost, 3 Ability, 1 Proficiency, but they *must* be in the order specified.
+
+Each roll will provide a popup allowing users to see the results of each die rolled. Until I build a Slack-based tool to build a roll, please use https://1drv.ms/x/s!AvhP-wzyF87bhzj4pej0svdXaSsy?e=euVGxg or the mnemonic “Be SAD, PC!”
 
 *4.* Roll the more standard gaming format of `NdX±Y`, e.g. `#{cgi["command"]} 4d6+2`, `3d8-2`, or `d100`. Omitting the number of dice to roll defaults to 1 rolled die. `d100` can be shortened to `d00`, `d0`, or `d%`. You can now add up to two additional die rolls; the formats are: `NdX±Y`, `NdX±Y±N'dX'±Y'`, `NdX±Y±N'dX'±Y±N"dX"±Y"`.
 
