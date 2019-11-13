@@ -666,7 +666,7 @@ when /^(?:(\d)b)?(?:(\d)s)?(?:(\d)a)?(?:(\d)d)?(?:(\d)p)?(?:(\d)c)?(?:(\d)f)?(?:
 			sf_roll = 1
 			sw_detail[2][i] = {
 				"text" => "#{abilt_adv} Advantage, #{abilt_suc} Success",
-				"value" => "setbk_#{i}"
+				"value" => "abilt_#{i}"
 			}
 		end
 		for i in 1..dfclt
@@ -678,7 +678,7 @@ when /^(?:(\d)b)?(?:(\d)s)?(?:(\d)a)?(?:(\d)d)?(?:(\d)p)?(?:(\d)c)?(?:(\d)f)?(?:
 			sf_roll = 1
 			sw_detail[3][i] = {
 				"text" => "#{dfclt_thr} Threat, #{dfclt_fal} Failure",
-				"value" => "setbk_#{i}"
+				"value" => "dfclt_#{i}"
 			}
 		end
 		for i in 1..prfnc
@@ -692,7 +692,7 @@ when /^(?:(\d)b)?(?:(\d)s)?(?:(\d)a)?(?:(\d)d)?(?:(\d)p)?(?:(\d)c)?(?:(\d)f)?(?:
 			sf_roll = 1
 			sw_detail[4][i] = {
 				"text" => "#{prfnc_adv} Advantage, #{prfnc_suc} Success, #{prfnc_tri} Triumph",
-				"value" => "setbk_#{i}"
+				"value" => "prfnc_#{i}"
 			}
 		end
 		for i in 1..chlng
@@ -706,7 +706,7 @@ when /^(?:(\d)b)?(?:(\d)s)?(?:(\d)a)?(?:(\d)d)?(?:(\d)p)?(?:(\d)c)?(?:(\d)f)?(?:
 			sf_roll = 1
 			sw_detail[5][i] = {
 				"text" => "#{chlng_thr} Threat, #{chlng_fal} Failure, #{chlng_des} Despair",
-				"value" => "setbk_#{i}"
+				"value" => "chlng_#{i}"
 			}
 		end
 		for i in 1..force
@@ -717,7 +717,7 @@ when /^(?:(\d)b)?(?:(\d)s)?(?:(\d)a)?(?:(\d)d)?(?:(\d)p)?(?:(\d)c)?(?:(\d)f)?(?:
 			lht += force_lht
 			sw_detail[6][i] = {
 				"text" => "#{force_lht} Light, #{force_drk} Dark",
-				"value" => "setbk_#{i}"
+				"value" => "force_#{i}"
 			}
 		end
 #		STDERR.puts "FFG SW Roll ##{iteration}! #{boost} #{setbk} #{abilt} #{dfclt} #{prfnc} #{chlng} #{force} #{comment}#{iteration}" #
@@ -780,11 +780,11 @@ when /^(?:(\d)b)?(?:(\d)s)?(?:(\d)a)?(?:(\d)d)?(?:(\d)p)?(?:(\d)c)?(?:(\d)f)?(?:
 					"options" => [
 						{
 							"text" => "#{cheating[1]}",
-							"value" => "empty"
-#						},
-#						{
-#							"text" => "#{debug}",
-#							"value" => "empty"
+							"value" => "roll_string"
+						},
+						{
+							"text" => "#{debug}",
+							"value" => "roll_detail"
 						}
 					]
 				},
