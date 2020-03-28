@@ -311,34 +311,28 @@ when /^(?:(\d{1,2})?(?:\+(\d))?)(?: +\[(\d{1,2})\])?(?: +\((\d{1,2})\))?(?: +(.*
 		case rand(6)
 		when 5
 #			STDERR.puts("XPLD HIT!") #
-#			$roll_detail = "#{$roll_detail}→⚅"
 			$roll_detail = "#{$roll_detail}⚅"
 			$hits += 1
 				# Probability should prevent an endless loop.
 			explosion
 		when 4
 #			STDERR.puts("XPLD HIT!") #
-#			$roll_detail = "#{$roll_detail}→⚄"
 			$roll_detail = "#{$roll_detail}⚄"
 			$hits += 1
 		when 3
-#			$roll_detail = "#{$roll_detail}→⚃"
 			$roll_detail = "#{$roll_detail}⚃"
 		when 2
-#			$roll_detail = "#{$roll_detail}→⚂"
 			$roll_detail = "#{$roll_detail}⚂"
 		when 1
-#			$roll_detail = "#{$roll_detail}→⚁"
 			$roll_detail = "#{$roll_detail}⚁"
 		when 0
-#			$roll_detail = "#{$roll_detail}→⚀"
 			$roll_detail = "#{$roll_detail}⚀"
 		end
 	end
 
 	for iteration in 1..iterations
 
-		$roll_detail = "\n"
+		$roll_detail = ""
 
 		if iterations > 1
 			case comment
@@ -386,7 +380,7 @@ when /^(?:(\d{1,2})?(?:\+(\d))?)(?: +\[(\d{1,2})\])?(?: +\((\d{1,2})\))?(?: +(.*
 				$roll_detail = "#{$roll_detail}⚀"
 				ones += 1
 #			else
-#				STDERR.puts("POOL ROLL #{roll} MISS!") #
+#				STDERR.puts("How even did you get here?") #
 			end
 		end
 
@@ -419,7 +413,7 @@ when /^(?:(\d{1,2})?(?:\+(\d))?)(?: +\[(\d{1,2})\])?(?: +\((\d{1,2})\))?(?: +(.*
 				$roll_detail = "#{$roll_detail}⚀"
 				ones += 1
 #			else
-#				STDERR.puts("EDGE ROLL #{roll} MISS!") #
+#				STDERR.puts("How even did you get here?") #
 			end
 		end
 
@@ -564,7 +558,10 @@ when /^(?:(\d{1,2})?(?:\+(\d))?)(?: +\[(\d{1,2})\])?(?: +\((\d{1,2})\))?(?: +(.*
 						{
 							"title" => "#{result}#{critical}#{glitch}",
 #							"value" => net_string,
-							"value" => "#{net_string}#{$roll_detail.chars.sort.reverse.join(' ')}",
+#							"value" => "#{net_string}\n#{$roll_detail.chars.sort.reverse.join(' ').gsub(/(⚀|⚄|⚅)/,'*\1*')}",
+#							"value" => "#{net_string}\n#{$roll_detail.chars.sort.join(' ').gsub(/((?: ?⚀)+|(?:⚄ ?)+(?:⚅ ?)+)/,'*\1*')}",
+							"value" => "#{net_string}\n#{$roll_detail.chars.sort.reverse.join(' ').gsub(/((?:⚀ ?)+|(?: ?⚅)+(?: ?⚄)+)/,'*\1*')}",
+#							"value" => "#{net_string}\n*#{$roll_detail.chars.sort.reverse.join(' ')}*",
 							"short" => true
 						},
 						{
