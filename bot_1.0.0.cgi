@@ -160,7 +160,7 @@ when "edge_effect"
 		limit = reroll[5].to_i
 #		STDERR.puts("Limit: #{limit}") #
 		pool = hits + misses
-		slack_post["original_message"]["attachments"][0]["color"] = '36a64f'
+		slack_post["original_message"]["attachments"][0]["color"] = 'good'
 
 #		STDERR.puts("initial hits: #{hits} dice to roll: #{misses}")
 
@@ -197,11 +197,11 @@ when "edge_effect"
 				net != 1 && netstring = "#{net} Net Hits." or netstring = "1 Net Hit."
 			else
 				result = 'Failure.'
-				slack_post["original_message"]["attachments"][0]["color"] == '36a64f' && slack_post["original_message"]["attachments"][0]["color"] = 'warning'
+				slack_post["original_message"]["attachments"][0]["color"] == 'good' && slack_post["original_message"]["attachments"][0]["color"] = 'warning'
 			end
 		else
 			hits != 1 && result = "#{hits} Hits." or result = "1 Hit."
-			hits == 0 && slack_post["original_message"]["attachments"][0]["color"] == '36a64f' && slack_post["original_message"]["attachments"][0]["color"] = 'warning'
+			hits == 0 && slack_post["original_message"]["attachments"][0]["color"] == 'good' && slack_post["original_message"]["attachments"][0]["color"] = 'warning'
 #			hits == 0 && slack_post["original_message"]["attachments"][0]["color"] = 'warning'
 		end
 
