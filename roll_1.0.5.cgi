@@ -311,16 +311,34 @@ when /^(?:(\d{1,2})?(?:\+(\d))?)(?: +\[(\d{1,2})\])?(?: +\((\d{1,2})\))?(?: +(.*
 		case rand(6)
 		when 5
 #			STDERR.puts("XPLD HIT!") #
+#			$roll_detail = "#{$roll_detail}→⚅"
+			$roll_detail = "#{$roll_detail}⚅"
 			$hits += 1
 				# Probability should prevent an endless loop.
 			explosion
 		when 4
 #			STDERR.puts("XPLD HIT!") #
+#			$roll_detail = "#{$roll_detail}→⚄"
+			$roll_detail = "#{$roll_detail}⚄"
 			$hits += 1
+		when 3
+#			$roll_detail = "#{$roll_detail}→⚃"
+			$roll_detail = "#{$roll_detail}⚃"
+		when 2
+#			$roll_detail = "#{$roll_detail}→⚂"
+			$roll_detail = "#{$roll_detail}⚂"
+		when 1
+#			$roll_detail = "#{$roll_detail}→⚁"
+			$roll_detail = "#{$roll_detail}⚁"
+		when 0
+#			$roll_detail = "#{$roll_detail}→⚀"
+			$roll_detail = "#{$roll_detail}⚀"
 		end
 	end
 
 	for iteration in 1..iterations
+
+		$roll_detail = "\n"
 
 		if iterations > 1
 			case comment
@@ -350,13 +368,22 @@ when /^(?:(\d{1,2})?(?:\+(\d))?)(?: +\[(\d{1,2})\])?(?: +\((\d{1,2})\))?(?: +(.*
 				# At this point, you get the idea. Never case 5; it’s an endless loop if Edge is rolled
 			when 5
 #				STDERR.puts("POOL ROLL #{roll} HIT!") #
+				$roll_detail = "#{$roll_detail}⚅"
 				$hits += 1
 				edge > 0 && explosion
 			when 4
 #				STDERR.puts("POOL ROLL #{roll} HIT!") #
+				$roll_detail = "#{$roll_detail}⚄"
 				$hits += 1
+			when 3
+				$roll_detail = "#{$roll_detail}⚃"
+			when 2
+				$roll_detail = "#{$roll_detail}⚂"
+			when 1
+				$roll_detail = "#{$roll_detail}⚁"
 			when 0
 #				STDERR.puts("POOL ROLL #{roll} ONE!") #
+				$roll_detail = "#{$roll_detail}⚀"
 				ones += 1
 #			else
 #				STDERR.puts("POOL ROLL #{roll} MISS!") #
@@ -374,13 +401,22 @@ when /^(?:(\d{1,2})?(?:\+(\d))?)(?: +\[(\d{1,2})\])?(?: +\((\d{1,2})\))?(?: +(.*
 				# At this point, you get the idea. Never case 5; it’s an endless loop if Edge is rolled
 			when 5
 #				STDERR.puts("EDGE ROLL #{roll} HIT!") #
+				$roll_detail = "#{$roll_detail}⚅"
 				$hits += 1
 				explosion # Edge dice, so Rule of Six always applies
 			when 4
 #				STDERR.puts("EDGE ROLL #{roll} HIT!") #
+				$roll_detail = "#{$roll_detail}⚄"
 				$hits += 1
+			when 3
+				$roll_detail = "#{$roll_detail}⚃"
+			when 2
+				$roll_detail = "#{$roll_detail}⚂"
+			when 1
+				$roll_detail = "#{$roll_detail}⚁"
 			when 0
 #				STDERR.puts("EDGE ROLL #{roll} ONE!") #
+				$roll_detail = "#{$roll_detail}⚀"
 				ones += 1
 #			else
 #				STDERR.puts("EDGE ROLL #{roll} MISS!") #
@@ -527,7 +563,8 @@ when /^(?:(\d{1,2})?(?:\+(\d))?)(?: +\[(\d{1,2})\])?(?: +\((\d{1,2})\))?(?: +(.*
 					"fields" => [
 						{
 							"title" => "#{result}#{critical}#{glitch}",
-							"value" => net_string,
+#							"value" => net_string,
+							"value" => "#{net_string}#{$roll_detail.chars.sort.reverse.join}",
 							"short" => true
 						},
 						{
@@ -535,7 +572,10 @@ when /^(?:(\d{1,2})?(?:\+(\d))?)(?: +\[(\d{1,2})\])?(?: +\((\d{1,2})\))?(?: +(.*
 							"short" => true
 						},
 					],
+#					"footer" => "#{overflow}#{$roll_detail}",
+#					"footer" => "#{$roll_detail.chars.sort.reverse.join} #{overflow}",
 					"footer" => overflow,
+#					"footer" => $roll_detail,
 					"callback_id" => "edge_effect",
 					"actions" => [
 						second_chance,

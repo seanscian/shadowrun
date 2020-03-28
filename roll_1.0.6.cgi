@@ -338,7 +338,7 @@ when /^(?:(\d{1,2})?(?:\+(\d))?)(?: +\[(\d{1,2})\])?(?: +\((\d{1,2})\))?(?: +(.*
 
 	for iteration in 1..iterations
 
-		$roll_detail = ""
+		$roll_detail = "\n"
 
 		if iterations > 1
 			case comment
@@ -563,7 +563,8 @@ when /^(?:(\d{1,2})?(?:\+(\d))?)(?: +\[(\d{1,2})\])?(?: +\((\d{1,2})\))?(?: +(.*
 					"fields" => [
 						{
 							"title" => "#{result}#{critical}#{glitch}",
-							"value" => net_string,
+#							"value" => net_string,
+							"value" => "#{net_string}#{$roll_detail.chars.sort.reverse.join}",
 							"short" => true
 						},
 						{
@@ -572,8 +573,8 @@ when /^(?:(\d{1,2})?(?:\+(\d))?)(?: +\[(\d{1,2})\])?(?: +\((\d{1,2})\))?(?: +(.*
 						},
 					],
 #					"footer" => "#{overflow}#{$roll_detail}",
-					"footer" => "#{$roll_detail.chars.sort.reverse.join} #{overflow}",
-#					"footer" => overflow,
+#					"footer" => "#{$roll_detail.chars.sort.reverse.join} #{overflow}",
+					"footer" => overflow,
 #					"footer" => $roll_detail,
 					"callback_id" => "edge_effect",
 					"actions" => [
