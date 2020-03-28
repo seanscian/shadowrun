@@ -53,7 +53,7 @@ end
 
 	# Sanitize channel_id, user_id
 $channel_id = cgi["channel_id"].gsub(/[^0-9A-Za-z]/, '')
-$channel_id = $channel_id[0,9]
+$channel_id = $channel_id[0,11]
 
 	# Create recipient array, for private messages.
 $chat_targets = [ $channel_id ]
@@ -143,7 +143,8 @@ if alternates.length > 0
 end
 
 	# Emote names are just the “first” name.
-$emote_name = /^(\w+)/.match(sl_user)[1]
+#$emote_name = /^(\w+)/.match(sl_user)[1]
+$emote_name = /^(?:(?:La |El |The )?\w+)/.match(sl_user)[1]
 
 	# The pattern to look for “online” or “group” chat…
 $online_pattern = Regexp.new("^(?:#{$online_command.to_s} +(.*?) *)$")

@@ -452,7 +452,7 @@ when /^(?:(\d{1,2})?(?:\+(\d))?)(?: +\[(\d{1,2})\])?(?: +\((\d{1,2})\))?(?: +(.*
 			#    and if there were misses…
 			#    and if the limit was not reached…
 			#    Then provide a Second Chance!
-		STDERR.puts "E:#{edge} M:#{misses} H:#{$hits} L:#{limit}"
+		STDERR.puts "E:#{edge} 1:#{ones} M:#{misses} H:#{$hits} L:#{limit}"
 		if edge == 0 and misses > 0 and $hits < limit
 			second_chance = {
 				"name" => "second_chance",
