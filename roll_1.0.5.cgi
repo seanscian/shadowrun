@@ -564,7 +564,7 @@ when /^(?:(\d{1,2})?(?:\+(\d))?)(?: +\[(\d{1,2})\])?(?: +\((\d{1,2})\))?(?: +(.*
 						{
 							"title" => "#{result}#{critical}#{glitch}",
 #							"value" => net_string,
-							"value" => "#{net_string}#{$roll_detail.chars.sort.reverse.join}",
+							"value" => "#{net_string}#{$roll_detail.chars.sort.reverse.join(' ')}",
 							"short" => true
 						},
 						{
