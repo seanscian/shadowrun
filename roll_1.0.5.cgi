@@ -312,27 +312,21 @@ when /^(?:(\d{1,2})?(?:\+(\d))?)(?: +\[(\d{1,2})\])?(?: +\((\d{1,2})\))?(?: +(.*
 		case rand(6)
 		when 5
 #			STDERR.puts("XPLD HIT!") #
-#			$roll_detail = "#{$roll_detail}⑥"
 			$roll_detail = "#{$roll_detail}#{SIX_SIDES[5]} "
 			$hits += 1
 				# Probability should prevent an endless loop.
 			explosion
 		when 4
 #			STDERR.puts("XPLD HIT!") #
-#			$roll_detail = "#{$roll_detail}⑤"
 			$roll_detail = "#{$roll_detail}#{SIX_SIDES[4]}"
 			$hits += 1
 		when 3
-#			$roll_detail = "#{$roll_detail}④"
 			$roll_detail = "#{$roll_detail}#{SIX_SIDES[3]}"
 		when 2
-#			$roll_detail = "#{$roll_detail}③"
 			$roll_detail = "#{$roll_detail}#{SIX_SIDES[2]}"
 		when 1
-#			$roll_detail = "#{$roll_detail}②"
 			$roll_detail = "#{$roll_detail}#{SIX_SIDES[1]}"
 		when 0
-#			$roll_detail = "#{$roll_detail}①"
 			$roll_detail = "#{$roll_detail}#{SIX_SIDES[0]}"
 		end
 	end
@@ -375,21 +369,16 @@ when /^(?:(\d{1,2})?(?:\+(\d))?)(?: +\[(\d{1,2})\])?(?: +\((\d{1,2})\))?(?: +(.*
 				edge > 0 && explosion
 			when 4
 #				STDERR.puts("POOL ROLL #{roll} HIT!") #
-#				$roll_detail = "#{$roll_detail}⑤"
 				$roll_detail = "#{$roll_detail}#{SIX_SIDES[4]}"
 				$hits += 1
 			when 3
-#				$roll_detail = "#{$roll_detail}④"
 				$roll_detail = "#{$roll_detail}#{SIX_SIDES[3]}"
 			when 2
-#				$roll_detail = "#{$roll_detail}③"
 				$roll_detail = "#{$roll_detail}#{SIX_SIDES[2]}"
 			when 1
-#				$roll_detail = "#{$roll_detail}②"
 				$roll_detail = "#{$roll_detail}#{SIX_SIDES[1]}"
 			when 0
 #				STDERR.puts("POOL ROLL #{roll} ONE!") #
-#				$roll_detail = "#{$roll_detail}①"
 				$roll_detail = "#{$roll_detail}#{SIX_SIDES[0]}"
 				ones += 1
 #			else
@@ -408,27 +397,21 @@ when /^(?:(\d{1,2})?(?:\+(\d))?)(?: +\[(\d{1,2})\])?(?: +\((\d{1,2})\))?(?: +(.*
 				# At this point, you get the idea. Never case 5; it’s an endless loop if Edge is rolled
 			when 5
 #				STDERR.puts("EDGE ROLL #{roll} HIT!") #
-#				$roll_detail = "#{$roll_detail}⚅"
 				$roll_detail = "#{$roll_detail}#{SIX_SIDES[5]}"
 				$hits += 1
 				explosion # Edge dice, so Rule of Six always applies
 			when 4
 #				STDERR.puts("EDGE ROLL #{roll} HIT!") #
-#				$roll_detail = "#{$roll_detail}⚄"
 				$roll_detail = "#{$roll_detail}#{SIX_SIDES[4]}"
 				$hits += 1
 			when 3
-#				$roll_detail = "#{$roll_detail}⚃"
 				$roll_detail = "#{$roll_detail}#{SIX_SIDES[3]}"
 			when 2
-#				$roll_detail = "#{$roll_detail}⚂"
 				$roll_detail = "#{$roll_detail}#{SIX_SIDES[2]}"
 			when 1
-#				$roll_detail = "#{$roll_detail}⚁"
 				$roll_detail = "#{$roll_detail}#{SIX_SIDES[1]}"
 			when 0
 #				STDERR.puts("EDGE ROLL #{roll} ONE!") #
-#				$roll_detail = "#{$roll_detail}⚀"
 				$roll_detail = "#{$roll_detail}#{SIX_SIDES[0]}"
 				ones += 1
 #			else
