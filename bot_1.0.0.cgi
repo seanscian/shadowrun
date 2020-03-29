@@ -43,7 +43,8 @@ else
 end
 
 	# D6 string, for fun (read: Shadowrun).
-die_string = "⚀⚁⚂⚃⚄⚅"
+#die_string = "⚀⚁⚂⚃⚄⚅"
+die_string = "①②③④⑤⑥"
 
 	# Method to consume a Slack callback. As above, this is still a Ruby hash,
 	# and stays that way until conversion into the request’s post body.
