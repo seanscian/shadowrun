@@ -527,6 +527,16 @@ when /^(?:(\d{1,2})?(?:\+(\d))?)(?: +\[(\d{1,2})\])?(?: +\((\d{1,2})\))?(?: +(.*
 			overflow = nil
 		end
 
+		roll_detail_popup = {
+			"name" => "roll_detail_popup",
+			"type" => "button",
+			"text" => "Roll Detail…",
+			"confirm" => {
+				"title" => "Roll Details",
+				"text" => $roll_detail.chars.sort.reverse.join(' '),
+			}
+		}
+
 		net = nil
 		net_string = nil
 		if threshold > 0
@@ -576,11 +586,11 @@ when /^(?:(\d{1,2})?(?:\+(\d))?)(?: +\[(\d{1,2})\])?(?: +\((\d{1,2})\))?(?: +(.*
 					"fields" => [
 						{
 							"title" => "#{result}#{critical}#{glitch}",
-#							"value" => net_string,
+							"value" => net_string,
 #							"value" => "#{net_string}\n#{$roll_detail.chars.sort.reverse.join(' ').gsub(/(⚀|⚄|⚅)/,'*\1*')}",
 #							"value" => "#{net_string}\n#{$roll_detail.chars.sort.join(' ').gsub(/((?: ?⚀)+|(?:⚄ ?)+(?:⚅ ?)+)/,'*\1*')}",
 #							"value" => "#{net_string}\n#{$roll_detail.chars.sort.reverse.join(' ').gsub(/((?:⚀ ?)+|(?: ?⚅)+(?: ?⚄)+)/,'*\1*')}",
-							"value" => "#{net_string}\n#{$roll_detail.chars.sort.reverse.join}",
+# THIS ONE							"value" => "#{net_string}\n#{$roll_detail.chars.sort.reverse.join}",
 #							"value" => "#{net_string}\n*#{$roll_detail.chars.sort.reverse.join(' ')}*",
 							"short" => true
 						},
@@ -595,6 +605,7 @@ when /^(?:(\d{1,2})?(?:\+(\d))?)(?: +\[(\d{1,2})\])?(?: +\((\d{1,2})\))?(?: +(.*
 #					"footer" => $roll_detail,
 					"callback_id" => "edge_effect",
 					"actions" => [
+						roll_detail_popup,
 						second_chance,
 						cc_button
 					]
