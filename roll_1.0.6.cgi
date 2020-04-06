@@ -36,8 +36,7 @@ database = 'rpdb'
 	# only, so there shouldn’t be anything that can damage the database, but
 	# I would like to avoid anything like shell scriping or other injections.
 #STDERR.puts("Received: #{cgi["token"]}")
-token = cgi["token"].gsub(/[^0-9A-Za-z]/, '')
-token = token[0,24]
+token = cgi["token"].gsub(/[^0-9A-Za-z]/, '')[0,24]
 #STDERR.puts("Current: #{token}")
 
 	# Use SQLite to see if the token we receive is in the database.
@@ -57,11 +56,9 @@ if rpdb.execute("select token from tokens where token is \"#{token}\"").length =
 end
 
 	# Sanitize channel_id, user_id
-channel_id = cgi["channel_id"].gsub(/[^0-9A-Za-z]/, '')
-channel_id = channel_id[0,9]
+channel_id = cgi["channel_id"].gsub(/[^0-9A-Za-z]/, '')[0,11]
 
-user_id = cgi["user_id"].gsub(/[^0-9A-Za-z]/, '')
-user_id = user_id[0,9]
+user_id = cgi["user_id"].gsub(/[^0-9A-Za-z]/, '')[0,9]
 
 text = cgi['text']
 
