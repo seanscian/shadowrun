@@ -135,31 +135,37 @@ end
 help_text = <<HELPTEXT
 This command accepts several dice roll types:
 
-*1.* Roll a _*Shadowrun*_ dice pool of the format `p+e`, e.g. `#{cgi["command"]} 5+3`, where 5 is your dice pool and 3 is your Edge dice. You can omit either, but not both, e.g. `#{cgi["command"]} 5` or `#{cgi["command"]} +3`. This type also accepts optional [Limit] and (Threshold), e.g. `#{cgi["command"]} 10+2 (3)`, `#{cgi["command"]} 10+2 [5] (3)`, or `#{cgi["command"]} 10+2 [4]`.
+*• Shadowrun*
+>Roll a _*Shadowrun*_ dice pool of the format `p+e`, e.g. `#{cgi["command"]} 5+3`, where 5 is your dice pool and 3 is your Edge dice. You can omit either, but not both, e.g. `#{cgi["command"]} 5` or `#{cgi["command"]} +3`. This type also accepts optional [Limit] and (Threshold), e.g. `#{cgi["command"]} 10+2 (3)`, `#{cgi["command"]} 10+2 [5] (3)`, or `#{cgi["command"]} 10+2 [4]`.
+>
+>The color of the sidebar will be green if you rolled any hits, yellow if you didn’t. Red indicates a *Glitch*, while black means *Critical Glitch*. If a Threshold was supplied, green indicates success, yellow indicates failure.
+>
+>Magicians can, after their roll command, specify the dice to resist drain (and a comment) with the `/drain` token, e.g. `#{cgi["command"]} 18 [8] Clout /drain 13 S3`. This example would perform the roll of 18 pool dice, limit 8, with the comment “Clout”. It would be followed immediately by a roll of 13 dice with the comment “Resist drain for Clout S3”.
+>
+>Technomancers can do the same thing, using the `/fading` token. (Technically, magicians can use the `/fading` token and technomancers can use the `/drain` token. It’s the same code.)
 
-The color of the sidebar will be green if you rolled any hits, yellow if you didn’t. Red indicates a *Glitch*, while black means *Critical Glitch*. If a Threshold was supplied, green indicates success, yellow indicates failure.
+*• Shadowrun Initiative*
+>Roll a _*Shadowrun*_ initiative roll using the format `r+i`, e.g. `#{cgi["command"]} /init 9+4`, where 9 is your Reaction a 4 is your effective Initiative pool. If you omit the +#, e.g. `#{cgi["command"]} /init 9`, the roller assumes a single initiative die.
 
-Magicians can, after their roll command, specify the dice to resist drain (and a comment) with the `/drain` token, e.g. `#{cgi["command"]} 18 [8] Clout /drain 13 S3`. This example would perform the roll of 18 pool dice, limit 8, with the comment “Clout”. It would be followed immediately by a roll of 13 dice with the comment “Resist drain for Clout S3”.
+*• Star Wars*
+>Roll a _*Star Wars*_ Boost, Setback, Ability, Difficulty, Proficiency, Challenge, and Force roll using the format `#b#s#a#d#p#c#f`. Each element is optional, but the order is strict.  For example, you can roll `2b3a1p` for 2 Boost, 3 Ability, 1 Proficiency, but they *must* be in the order specified.
+>
+>Each roll will provide a popup allowing users to see the results of each die rolled. Until I build a Slack-based tool to build a roll, please use https://1drv.ms/x/s!AvhP-wzyF87bhzj4pej0svdXaSsy?e=euVGxg or the mnemonic “Be SAD, PC!”
 
-Technomancers can do the same thing, using the `/fading` token. (Technically, magicians can use the `/fading` token and technomancers can use the `/drain` token. It’s the same code.)
+*• Standard*
+>Roll the more standard gaming format of `NdX±Y`, e.g. `#{cgi["command"]} 4d6+2`, `3d8-2`, or `d100`. Omitting the number of dice to roll defaults to 1 rolled die. `d100` can be shortened to `d00`, `d0`, or `d%`. You can now add up to two additional die rolls; the formats are: `NdX±Y`, `NdX±Y±N'dX'±Y'`, `NdX±Y±N'dX'±Y±N"dX"±Y"`.
+>
+>For example, for an event like damage (1d4) plus sneak attack bonus (1d6) plus strength bonus (3), you would roll `#{cgi["command"]} d4+d6+3`. As the parser is very simple you can unprison your think rhino and roll this obscenity: `/roll 3d7-2-4d3+8+22d2+2`
 
-*2.* Roll a _*Shadowrun*_ initiative roll using the format `r+i`, e.g. `#{cgi["command"]} /init 9+4`, where 9 is your Reaction a 4 is your effective Initiative pool. If you omit the +#, e.g. `#{cgi["command"]} /init 9`, the roller assumes a single initiative die.
+*Options*
+>*• Comments*
+>Any roll will accept, after the roll syntax, a comment to help identify the roll’s purpose, e.g. `#{cgi["command"]} 4+2 Bad Guy #1 Dodge`.
+>
+>*• M—M—Multi-roll!*
+>If you use the command `/mroll`, you can specify multiple rolls; typing a number between 1 and 5 after `/mroll`, e.g. `/mroll 3 /init 11+1 Flyspy`, will cause that number of rolls to be made. The number of the roll will be shown, appended to any comment if one was provided.
 
-*3.* Roll a _*Star Wars*_ Boost, Setback, Ability, Difficulty, Proficiency, Challenge, and Force roll using the format `#b#s#a#d#p#c#f`. Each element is optional, but the order is strict.  For example, you can roll `2b3a1p` for 2 Boost, 3 Ability, 1 Proficiency, but they *must* be in the order specified.
-
-Each roll will provide a popup allowing users to see the results of each die rolled. Until I build a Slack-based tool to build a roll, please use https://1drv.ms/x/s!AvhP-wzyF87bhzj4pej0svdXaSsy?e=euVGxg or the mnemonic “Be SAD, PC!”
-
-*4.* Roll the more standard gaming format of `NdX±Y`, e.g. `#{cgi["command"]} 4d6+2`, `3d8-2`, or `d100`. Omitting the number of dice to roll defaults to 1 rolled die. `d100` can be shortened to `d00`, `d0`, or `d%`. You can now add up to two additional die rolls; the formats are: `NdX±Y`, `NdX±Y±N'dX'±Y'`, `NdX±Y±N'dX'±Y±N"dX"±Y"`.
-
-For example, for an event like damage (1d4) plus sneak attack bonus (1d6) plus strength bonus (3), you would roll `#{cgi["command"]} d4+d6+3`. As the parser is very simple you can unprison your think rhino and roll this obscenity: `/roll 3d7-2-4d3+8+22d2+2`
-
-Any roll will accept, after the roll syntax, a comment to help identify the roll’s purpose, e.g. `#{cgi["command"]} 4+2 Bad Guy #1 Dodge`.
-
-If you use the command `/mroll`, you can specify multiple rolls; typing a number between 1 and 5 after `/mroll`, e.g. `/mroll 3 /init 11+1 Flyspy`, will cause that number of rolls to be made. The number of the roll will be shown, appended to any comment if one was provided.
-
-*IMPORTANT:* Tab no longer repeats the last command in Slack, so the old trick of using a zero dice in the unused fields isn’t as useful anymore. Consider copy/pasting something to the private chat Slack gives you with yourself, e.g. `#{cgi["command"]} 1b0s2a2d1p0c0f`, so you can revisit that for formatting. Of course, you can always just invoke this help and copy paste it from here.
-
-Finally, you can roll dice generically in any Channel or Direct Message; no specific character name will be attached to the roll, but all other functions remain unchanged. This means you can even use `/roll` in your own direct message channel if you don’t want to share the results.
+*Who can use this?*
+> You can `#{cgi["command"]}` in any Channel or Direct Message; if it’s not a configured game channel, no specific character name will be attached to the roll, but all other functions remain unchanged. This means you can even use `#{cgi["command"]}` in your own direct message channel if you don’t want to share the results.
 HELPTEXT
 
 case text
