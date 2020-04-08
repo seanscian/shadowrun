@@ -155,7 +155,7 @@ This command accepts several dice roll types:
 *• Standard*
 >Roll the more standard gaming format of `NdX±Y`, e.g. `#{cgi["command"]} 4d6+2`, `3d8-2`, or `d100`. Omitting the number of dice to roll defaults to 1 rolled die. `d100` can be shortened to `d00`, `d0`, or `d%`. You can now add up to two additional die rolls; the formats are: `NdX±Y`, `NdX±Y±N'dX'±Y'`, `NdX±Y±N'dX'±Y±N"dX"±Y"`.
 >
->For example, for an event like damage (1d4) plus sneak attack bonus (1d6) plus strength bonus (3), you would roll `#{cgi["command"]} d4+d6+3`. As the parser is very simple you can unprison your think rhino and roll this obscenity: `/roll 3d7-2-4d3+8+22d2+2`
+>For example, for an event like damage (1d4) plus sneak attack bonus (1d6) plus strength bonus (3), you would roll `#{cgi["command"]} d4+d6+3`. As the parser is very simple you can unprison you think rhino and roll this obscenity: `/roll 3d7-2-4d3+8+22d2+2`
 
 *Options*
 >*• Comments*
