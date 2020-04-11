@@ -105,6 +105,20 @@ else
 	rescue
 		default_icon = ''
 	end
+	begin
+		alternates = rpdb.execute("SELECT source FROM chat_targets WHERE config IS #{db_config} AND dest IS \"#{channel_id}\"")
+	rescue
+		alternates = nil
+	end
+end
+
+if alternates.length > 0
+#	STDERR.puts("alternates found") #
+	$chat_targets = Array.new
+	alternates.each { |chan| $chat_targets[$chat_targets.length] = chan[0] }
+else
+#	STDERR.puts("no alternates found, rolling in #{channel_id}") #
+	$chat_targets = [ channel_id ]
 end
 
 chat_icon == '' && chat_icon = default_icon
@@ -228,61 +242,68 @@ when /^\/init +([1-9]{1}[0-9]?)(?:\+([1-5]{1}))?(?: +(.*?))? *$/
 			end
 		end
 
-		reinit_state = "#{user_id} #{total} 0"
-		message = {
-			"response_type" => "in_channel",
-			"text" => "*#{sl_user}#{comment}#{iter_comment}*",
-			"attachments" => [
-				{
-					"color" => "#764FA5",
-					"mrkdwn_in" => [ "text" ],
-					"callback_id" => "re_init",
-					"thumb_url" => chat_icon,
-					"fields" => [
-						{
-							"title" => "Initiative: #{total}",
-							"short" => "true"
-						},
-						{
-							"value" => "Reaction #{$1.to_i} + #{roll_string}\n",
-							"short" => "true"
-						}
-					],
-					"actions" => [
-						{
-							"style" => "primary",
-							"name" => "up_stat",
-							"text" => "+1",
-							"type" => "button",
-							"value" => reinit_state
-						},
-						{
-							"style" => "danger",
-							"name" => "dn_stat",
-							"text" => "−1",
-							"type" => "button",
-							"value" => reinit_state
-						},
-						{
-							"style" => "primary",
-							"name" => "up_init",
-							"text" => "+🎲",
-							"type" => "button",
-							"value" => reinit_state
-						},
-						{
-							"style" => "danger",
-							"name" => "dn_init",
-							"text" => "−🎲",
-							"type" => "button",
-							"value" => reinit_state
-						}
-					]
-				}
-			]
+		$chat_targets.each {
+			|src_tgt|
+#			STDERR.puts(src_tgt) #
+			reinit_state = "#{user_id} #{total} 0"
+			message = {
+				"channel" => src_tgt,
+				"response_type" => "in_channel",
+				"text" => "*#{sl_user}#{comment}#{iter_comment}*",
+				"attachments" => [
+					{
+						"color" => "#764FA5",
+						"mrkdwn_in" => [ "text" ],
+						"callback_id" => "re_init",
+						"thumb_url" => chat_icon,
+						"fields" => [
+							{
+								"title" => "Initiative: #{total}",
+								"short" => "true"
+							},
+							{
+								"value" => "Reaction #{$1.to_i} + #{roll_string}\n",
+								"short" => "true"
+							}
+						],
+						"actions" => [
+							{
+								"style" => "primary",
+								"name" => "up_stat",
+								"text" => "+1",
+								"type" => "button",
+								"value" => reinit_state
+							},
+							{
+								"style" => "danger",
+								"name" => "dn_stat",
+								"text" => "−1",
+								"type" => "button",
+								"value" => reinit_state
+							},
+							{
+								"style" => "primary",
+								"name" => "up_init",
+								"text" => "+🎲",
+								"type" => "button",
+								"value" => reinit_state
+							},
+							{
+								"style" => "danger",
+								"name" => "dn_init",
+								"text" => "−🎲",
+								"type" => "button",
+								"value" => reinit_state
+							}
+						]
+					}
+				]
+			}
+
+#			post_message(cgi["response_url"],message)
+			post_message(chat_hook,message)
 		}
 
-		post_message(cgi["response_url"],message)
 	end
 	# Shadowrun Dice Pool, Edge, Limit, Threshold, Comment
 	#    Pool: 1-2 digits, optional, capture group 1

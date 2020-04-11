@@ -28,10 +28,10 @@ puts("Content-type: text/plain\r\nTransfer-Encoding: Chunked\r\n\r\n0\r\n\r\n")
 slack_post = JSON.parse(cgi['payload'])
 
 	# Sanitize the input token.
-#STDERR.puts("Received: #{slack_post["token"]}")
+#STDERR.puts("Received: #{slack_post["token"]}") #
 slack_post["token"].gsub!(/[^0-9A-Za-z]/, '')
 slack_post["token"] = slack_post["token"][0,24]
-#STDERR.puts("Current: #{slack_post["token"]}")
+#STDERR.puts("Current: #{slack_post["token"]}") #
 
 	# Use SQLite to see if the token we receive is in the database.
 	# Anyone have a better idea?
@@ -39,11 +39,10 @@ if SQLite3::Database.new('rpdb').execute("select token from tokens where token i
 	STDERR.puts('You’re not supposed to be here.')
 	exit
 else
-#	STDERR.puts('PLAYER ONE HAS ENTERED THE GAME!')
+#	STDERR.puts('PLAYER ONE HAS ENTERED THE GAME!') #
 end
 
 	# D6 string, for fun (read: Shadowrun).
-#die_string = "⚀⚁⚂⚃⚄⚅"
 die_string = "①②③④⑤⑥"
 
 	# Method to consume a Slack callback. As above, this is still a Ruby hash,
